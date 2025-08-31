@@ -673,13 +673,16 @@ bool LastingEffects::doesntMove(const Creature* c) {
       || c->isAffected(LastingEffect::FROZEN);
 }
 
-bool LastingEffects::restrictedMovement(const Creature* c) {
+bool LastingEffects::cantPerformTasks(const Creature* c) {
   auto steed = c->getSteed();
   return doesntMove(c) || (steed && restrictedMovement(steed))
       || (c->getSteed() && restrictedMovement(c->getSteed()))
       || c->isAffected(LastingEffect::ENTANGLED)
-      || c->isAffected(LastingEffect::TIED_UP)
-      || c->isAffected(LastingEffect::IMMOBILE);
+      || c->isAffected(LastingEffect::TIED_UP);
+}
+
+bool LastingEffects::restrictedMovement(const Creature* c) {
+  return cantPerformTasks(c) || c->isAffected(LastingEffect::IMMOBILE);
 }
 
 bool LastingEffects::canSwapPosition(const Creature* c) {
@@ -1292,6 +1295,17 @@ bool LastingEffects::obeysFormation(const Creature* c, const Creature* against) 
   return true;
 }
 
+bool LastingEffects::shouldAllyApplyAtAll(const Creature* victim, LastingEffect effect) {
+  switch (effect) {
+    case LastingEffect::TELEPATHY:
+      return victim->isAffected(LastingEffect::BLIND);
+    case LastingEffect::NIGHT_VISION:
+      return victim->getPosition().getLight() < Vision::getDarknessVisionThreshold();
+    default:
+      return true;
+  }
+}
+
 bool LastingEffects::shouldAllyApplyInDanger(const Creature* victim, LastingEffect effect) {
   switch (effect) {
     case LastingEffect::LIFE_SAVED:
@@ -1306,10 +1320,6 @@ bool LastingEffects::shouldAllyApplyInDanger(const Creature* victim, LastingEffe
     case LastingEffect::ARCHER_VISION:
     case LastingEffect::WARNING:
       return true;
-    case LastingEffect::TELEPATHY:
-      return victim->isAffected(LastingEffect::BLIND);
-    case LastingEffect::NIGHT_VISION:
-      return victim->getPosition().getLight() < Vision::getDarknessVisionThreshold();
     default:
       return false;
   }

@@ -693,8 +693,8 @@ void Collective::autoAssignSteeds() {
           return freeSteeds[i];
       return nullptr;
     }();
-    auto companion = c->getFirstCompanion();
-    if (!!companion && c->isSteedGoodSize(companion) && companion->isAffected(LastingEffect::STEED) &&
+    auto companion = c->getSteedCompanion();
+    if (!!companion &&
         (!bestAvailable || companion->getBestAttack(factory).value > bestAvailable->getBestAttack(factory).value))
       bestAvailable = companion;
     if (bestAvailable &&
@@ -1228,7 +1228,7 @@ bool Collective::hasPriorityTasks(Position pos) const {
 }
 
 void Collective::setSteed(Creature* rider, Creature* steed) {
-  if (!!steed && steed == rider->getFirstCompanion())
+  if (!!steed && steed == rider->getSteedCompanion())
     steed = rider;
   auto setImpl = [this] (Creature* c1, Creature* c2) {
     if (auto current = getSteedOrRider(c1))
@@ -1247,7 +1247,7 @@ void Collective::setSteed(Creature* rider, Creature* steed) {
 Creature* Collective::getSteedOrRider(Creature* minion) {
   auto ret = steedAssignments.getMaybe(minion).value_or(nullptr);
   if (ret == minion)
-    return minion->getFirstCompanion();
+    return minion->getSteedCompanion();
   return ret;
 }
 
@@ -1457,6 +1457,9 @@ void Collective::retire() {
   knownVillains.clear();
   discoverable = true;
   config->setConquerCondition(ConquerCondition::KILL_FIGHTERS_AND_LEADER);
+  // Clear non-minions from byTrait to workaround some bug where it contains bogus creatures.
+  for (auto trait : ENUM_ALL(MinionTrait))
+    byTrait[trait] = byTrait[trait].filter([this](Creature* c) { return creatures.contains(c); });
 }
 
 CollectiveWarnings& Collective::getWarnings() {

@@ -101,12 +101,14 @@ class LastingEffects {
   static bool canProlong(LastingEffect);
   static bool obeysFormation(const Creature*, const Creature* against);
   static bool shouldEnemyApply(const Creature* victim, LastingEffect);
+  static bool shouldAllyApplyAtAll(const Creature* victim, LastingEffect);
   static bool shouldAllyApplyInDanger(const Creature* victim, LastingEffect);
   static TimeInterval getDuration(LastingEffect);
   static void runTests();
   static Color getColor(LastingEffect);
   static bool losesControl(const Creature*, bool homeSite);
   static bool doesntMove(const Creature*);
+  static bool cantPerformTasks(const Creature*);
   static bool restrictedMovement(const Creature*);
   static bool canSwapPosition(const Creature*);
   static bool inheritsFromSteed(LastingEffect);

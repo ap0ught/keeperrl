@@ -849,7 +849,7 @@ class ByCollective : public Behaviour {
   }
 
   bool riderShouldDismount(Creature* c) {
-    if (!collective->getCreatures().contains(c->getSteed()) && c->getSteed() != c->getFirstCompanion())
+    if (!collective->getCreatures().contains(c->getSteed()) && c->getSteed() != c->getSteedCompanion())
       return true;
     auto& territory = collective->getTerritory();
     if (!riderNeedsSteed(c)) {
@@ -1029,7 +1029,7 @@ class ByCollective : public Behaviour {
   }
 
   MoveInfo newStandardTask() {
-    if (LastingEffects::restrictedMovement(creature))
+    if (LastingEffects::cantPerformTasks(creature))
       return NoMove;
     //if (Random.roll(5))
     if (auto t = getStandardTask())

@@ -1548,11 +1548,12 @@ vector<Creature*> Creature::getCompanions(bool withNoKillCreditOnly) const {
   return ret;
 }
 
-Creature* Creature::getFirstCompanion() const {
+Creature* Creature::getSteedCompanion() const {
   for (auto& group : companions)
-    for (auto c : group.creatures)
-      if (!c->isDead())
-        return c.get();
+    for (auto c1 : group.creatures)
+      if (auto c = c1.get())
+        if (!c->isDead() && c->isAffected(LastingEffect::STEED) && isSteedGoodSize(c))
+          return c;
   return nullptr;
 }
 
@@ -1975,7 +1976,7 @@ bool Creature::considerSavingLife(DropType drops, const Creature* attacker) {
   if (drops != DropType::NOTHING && isAffected(LastingEffect::LIFE_SAVED)) {
     message(TStringId("BUT_WAIT"));
     verb(TStringId("YOU_ESCAPE_DEATH"), TStringId("ESCAPES_DEATH"));
-    if (attacker && attacker->getName().bare() == TStringId("DEATH")) {
+    if (attacker && attacker->getName().bare() == TStringId("CREATURE_ATTRIBUTES_DEATH_NAME")) {
       if (auto target = findInaccessiblePos(position))
         position.moveCreature(*target, true);
       getGame()->achieve(AchievementId("tricked_death"));
