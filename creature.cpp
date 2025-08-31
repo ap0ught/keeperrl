@@ -2704,6 +2704,10 @@ bool Creature::canNavigateTo(Position pos) const {
   return pos.canNavigateTo(position, getMovementType());
 }
 
+bool Creature::hasQuarters() const {
+  return getAttributes().getHasQuarters();
+}
+
 CreatureAction Creature::moveTowards(Position pos, bool away, NavigationFlags flags) {
   PROFILE;
   CHECK(pos.isSameLevel(position));

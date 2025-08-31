@@ -765,8 +765,8 @@ SGuiElem GuiFactory::labelHighlight(const TString& s, Color c, char hotkey) {
   return mouseHighlight2(label(s, highlighted, hotkey), label(s, c, hotkey));
 }
 
-SGuiElem GuiFactory::buttonLabel(const TString& s, function<void()> f, bool matchTextWidth, bool centerHorizontally, bool unicode) {
-  return buttonLabel(s, button(std::move(f)), matchTextWidth, centerHorizontally, unicode);
+SGuiElem GuiFactory::buttonLabel(const TString& s, function<void()> f, bool matchTextWidth, bool centerHorizontally, bool unicode, Color color) {
+  return buttonLabel(s, button(std::move(f)), matchTextWidth, centerHorizontally, unicode, color);
 }
 
 SGuiElem GuiFactory::buttonLabelFocusable(SGuiElem content, function<void()> callback, function<bool()> focused,
@@ -839,8 +839,8 @@ SGuiElem GuiFactory::buttonLabelBlink(const TString& s, function<void()> f, func
       conditionalStopKeys(keyHandler(f, Keybinding("MENU_SELECT"), SoundId("BUTTON_CLICK")), focused));
 }
 
-SGuiElem GuiFactory::buttonLabel(const TString& s, SGuiElem button, bool matchTextWidth, bool centerHorizontally, bool unicode) {
-  auto text = unicode ? labelUnicode(s) : label(s);
+SGuiElem GuiFactory::buttonLabel(const TString& s, SGuiElem button, bool matchTextWidth, bool centerHorizontally, bool unicode, Color color) {
+  auto text = unicode ? labelUnicode(s, color) : label(s, color);
   if (centerHorizontally)
     text = centerHoriz(std::move(text));
   return standardButton(std::move(text), std::move(button), matchTextWidth);

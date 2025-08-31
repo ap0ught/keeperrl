@@ -2685,6 +2685,35 @@ function<void(Rectangle)> GuiBuilder::getItemCountCallback(const CollectiveInfo:
   };
 }
 
+using QIInfo = CollectiveInfo::QueuedItemInfo;
+vector<function<void()>> GuiBuilder::getPriorityCallbacks(const vector<QIInfo> &queued, int idx) {
+    vector<function<void()>> callbacks;
+    const QIInfo* higherElem = nullptr;             // higher and lower on the list GUI wise
+    const QIInfo* elem = &queued[idx];
+    const QIInfo* lowerElem = nullptr;
+    if (idx > 0) higherElem = &queued[idx - 1];
+    if (idx + 1 < queued.size()) lowerElem = &queued[idx + 1];
+
+    int highElemIdx = higherElem != nullptr ? higherElem->itemIndex : 0;
+    int lowElemIdx = lowerElem != nullptr ? lowerElem->itemIndex : 0;
+    int highElemCount = higherElem != nullptr ? higherElem->itemInfo.number : 0;
+    int lowElemCount = lowerElem != nullptr ? lowerElem->itemInfo.number : 0;
+
+    callbacks.emplace_back(
+      getButtonCallback(
+        { UserInputId::WORKSHOP_INCREASE_PRIORITY, WorkshopPriorityInfo { 
+            elem->itemIndex, elem->itemInfo.number, highElemIdx, highElemCount,
+            [&]() { return renderer.isKeypressed(SDL::SDL_SCANCODE_LSHIFT) || renderer.isKeypressed(SDL::SDL_SCANCODE_RSHIFT);}}}));
+
+    callbacks.emplace_back(
+      getButtonCallback(
+        { UserInputId::WORKSHOP_DECREASE_PRIORITY, WorkshopPriorityInfo { 
+            elem->itemIndex, elem->itemInfo.number, lowElemIdx, lowElemCount,
+            [&]() { return renderer.isKeypressed(SDL::SDL_SCANCODE_LSHIFT) || renderer.isKeypressed(SDL::SDL_SCANCODE_RSHIFT);}}}));                     
+
+    return callbacks;
+}
+
 SGuiElem GuiBuilder::drawWorkshopsOverlay(const CollectiveInfo::ChosenWorkshopInfo& info,
     const optional<TutorialInfo>& tutorial, optional<Vec2> dummyIndex) {
   int margin = 20;
@@ -2843,26 +2872,32 @@ SGuiElem GuiBuilder::drawWorkshopsOverlay(const CollectiveInfo::ChosenWorkshopIn
     auto changeCountCallback = getItemCountCallback(elem);
     if (info.allowChangeNumber && !elem.itemInfo.ingredient)
       line.addBackElemAuto(WL(leftMargin, 7, WL(buttonLabel, TString("+/-"_s), WL(buttonRect, changeCountCallback))));
+    auto prioButtonsCallbacks = getPriorityCallbacks(queued, i);
+    line.addBackElemAuto(WL(leftMargin, 15, WL(buttonLabel, TString(u8"↑"_s), prioButtonsCallbacks[0], true, true , true, Color::GREEN)));
+    line.addBackElemAuto(WL(leftMargin, 15, WL(buttonLabel, TString(u8"↓"_s), prioButtonsCallbacks[1], true, true , true, Color::RED)));
     auto removeCallback = getButtonCallback({UserInputId::WORKSHOP_CHANGE_COUNT,
         WorkshopCountInfo{ elem.itemIndex, elem.itemInfo.number, 0 }});
-    line.addBackElemAuto(WL(topMargin, 3, WL(leftMargin, 7, WL(stack,
+    line.addBackElemAuto(WL(topMargin, 3, WL(leftMargin, 10, WL(stack,
         WL(button, removeCallback),
         WL(labelUnicodeHighlight, TString(u8"✘"_s), Color::RED)))));
     auto tooltip = rawTooltip(elem.itemInfo, elem.paid ? optional<TString>() : elem.itemInfo.unavailableReason,
         queued[i].creatureInfo, i + THIS_LINE, queued[i].maxUpgrades);
+    
     auto guiElem = WL(stack, makeVec(
         WL(bottomMargin, 5, WL(progressBar, Color::DARK_GREEN.transparency(128), elem.productionState)),
         WL(conditionalStopKeys, WL(stack,
             WL(uiHighlightFrameFilled),
-            WL(keyHandlerRect, [this, changeCountCallback, removeCallback, itemUpgradeCallback] (Rectangle r) {
+            WL(keyHandlerRect, [this, changeCountCallback, removeCallback, itemUpgradeCallback, prioButtonsCallbacks] (Rectangle r) {
               vector<SGuiElem> lines {
                 WL(label, TStringId("WORKSHOP_CHANGE_COUNT_BUTTON")),
-                WL(label, TStringId("WORKSHOP_REMOVE_BUTTON"))
+                WL(label, TStringId("WORKSHOP_REMOVE_BUTTON")),
+                WL(label, TStringId("WORKSHOP_INCREASE_PRIORITY")),
+                WL(label, TStringId("WORKSHOP_DECREASE_PRIORITY"))
               };
               vector<function<void()>> callbacks {
-                [r, changeCountCallback] { changeCountCallback(r); },
-                removeCallback,
-              };
+                [r, changeCountCallback] { changeCountCallback(r); }, removeCallback };
+              callbacks.emplace_back(prioButtonsCallbacks[0]);
+              callbacks.emplace_back(prioButtonsCallbacks[1]);
               if (itemUpgradeCallback) {
                 lines.insert(1, WL(label, TStringId("WORKSHOP_UPGRADE_BUTTON")));
                 callbacks.insert(1, [r, itemUpgradeCallback] { itemUpgradeCallback(r); });
@@ -4272,6 +4307,7 @@ SGuiElem GuiBuilder::drawMinionActions(const PlayerInfo& minion, const optional<
   auto line = WL(getListBuilder, buttonWidth);
   auto lineExtra = WL(getListBuilder, buttonWidth);
   const bool tutorialHighlight = tutorial && tutorial->highlights.contains(TutorialHighlight::CONTROL_TEAM);
+  SGuiElem quartersButtonElem;
   for (auto action : Iter(minion.actions)) {
     auto focusCallback = [this, action]{ return minionPageIndex == MinionPageElems::MinionAction{action.index()};};
     auto input = UserInput{UserInputId::MINION_ACTION, MinionActionInfo{minion.creatureId, *action}};
@@ -4308,6 +4344,16 @@ SGuiElem GuiBuilder::drawMinionActions(const PlayerInfo& minion, const optional<
               getTooltip({TStringId("LOCK_POSITION_TOOLTIP")}, THIS_LINE)
           ));
           break;
+      case PlayerInfo::Action::QUARTERS:
+          quartersButtonElem = WL(buttonLabelFocusable, 
+            WL(centerHoriz, WL(getListBuilder)
+              .addElemAuto(WL(label, TStringId("QUARTERS_BUTTON")))
+              .addElemAuto(minion.hasQuarters
+                 ? WL(labelUnicode, TString(u8" ✓"_s), Color::GREEN)
+                 : WL(labelUnicode, TString(u8" ✘"_s), Color::RED))
+              .buildHorizontalList()), 
+            getButtonCallback(input), focusCallback, false, true);
+          break;
     }
     whichLine.addSpace(buttonSpacing);
   }
@@ -4338,6 +4384,10 @@ SGuiElem GuiBuilder::drawMinionActions(const PlayerInfo& minion, const optional<
   if (!minion.equipmentGroups.empty())
     line2.addElem(WL(buttonLabelFocusable, TStringId("RESTRICT_GEAR_BUTTON"),
         getEquipmentGroupsFun(minion), getNextFocusPredicate(), false, true));
+  if (quartersButtonElem) {
+      line2.addSpace(buttonSpacing);
+      line2.addElem(quartersButtonElem);
+  }
   if (!lineExtra.isEmpty()) {
     line2.addBackElemAuto(lineExtra.buildHorizontalList());
     line2.addBackSpace(buttonSpacing);

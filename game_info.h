@@ -154,6 +154,7 @@ class PlayerInfo {
   };
   vector<MinionActivityInfo> HASH(minionTasks);
   AIType HASH(aiType);
+  bool HASH(hasQuarters);
   UniqueEntity<Creature>::Id HASH(creatureId);
   int HASH(moveCounter);
   ViewIdList HASH(viewId);
@@ -178,7 +179,7 @@ class PlayerInfo {
     HASH_ALL(viewId, name, locked);
   };
   vector<EquipmentGroupInfo> HASH(equipmentGroups);
-  HASH_ALL(attributes, firstName, name, groupName, title, experienceInfo, positionHash, effects, spells, lyingItems, inventory, minionTasks, aiType, creatureId, viewId, actions, commands, debt, bestAttack, carryLimit, intrinsicAttacks, teamInfos, moveCounter, isPlayerControlled, controlMode, teamMemberActions, teamOrders, spellSchools, kills, killTitles, canExitControlMode, equipmentGroups)
+  HASH_ALL(attributes, firstName, name, groupName, title, experienceInfo, positionHash, effects, spells, lyingItems, inventory, minionTasks, aiType, creatureId, viewId, actions, commands, debt, bestAttack, carryLimit, intrinsicAttacks, teamInfos, moveCounter, isPlayerControlled, controlMode, teamMemberActions, teamOrders, spellSchools, kills, killTitles, canExitControlMode, equipmentGroups, hasQuarters)
 };
 
 struct ImmigrantCreatureInfo {

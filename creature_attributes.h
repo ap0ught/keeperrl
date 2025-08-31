@@ -76,6 +76,8 @@ class CreatureAttributes {
   void setBaseAttr(AttrType, int);
   void setAIType(AIType);
   AIType getAIType() const;
+  void setHasQuarters(bool);
+  bool getHasQuarters() const;
   const TString& getDeathDescription(const ContentFactory*) const;
   void setDeathDescription(TString);
   const Gender& getGender() const;
@@ -162,6 +164,7 @@ class CreatureAttributes {
   vector<pair<Gender, ViewId>> SERIAL(genderAlternatives);
   bool SERIAL(cantEquip) = false;
   AIType SERIAL(aiType) = AIType::MELEE;
+  bool SERIAL(hasQuarters) = false;
   bool SERIAL(boulder) = false;
   bool SERIAL(isSpecial) = false;
   vector<SpellSchoolId> SERIAL(spellSchools);

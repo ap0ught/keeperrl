@@ -4,6 +4,7 @@
 #include "file_sharing.h"
 #include "exit_info.h"
 #include "game_time.h"
+#include "translations.h"
 
 class View;
 class Highscores;

@@ -116,6 +116,19 @@ void performAction(const ScriptedUIData& data, ScriptedContext& context, EventCa
   }
 }
 
+void performActionDual(const ScriptedUIData& data, ScriptedContext& context, EventCallback& callback, MouseButtonId id) {
+  if (auto c = data.getReferenceMaybe<ScriptedUIDataElems::Callback>()) {
+    if (id == MouseButtonId::LEFT)
+      callback = c->fun;
+    else if (c->altFun && id == MouseButtonId::RIGHT)
+      callback = *c->altFun;
+  }
+  else {
+    USER_FATAL << "Expected callback";
+    fail();
+  }
+}
+
 struct Button : ScriptedUIInterface {
   void onClick(const ScriptedUIData& data, ScriptedContext& context, MouseButtonId id,
       Rectangle bounds, Vec2 pos, EventCallback& callback) const override {
@@ -133,6 +146,24 @@ struct Button : ScriptedUIInterface {
 };
 
 REGISTER_SCRIPTED_UI(Button);
+
+struct ButtonDual : ScriptedUIInterface {
+  void onClick(const ScriptedUIData& data, ScriptedContext& context, MouseButtonId id,
+      Rectangle bounds, Vec2 pos, EventCallback& callback) const override {
+    if (pos.inRectangle(bounds) == !reverse) {
+      performActionDual(data, context, callback, id);
+      if (soundId)
+        context.factory->soundLibrary->playSound(*soundId);
+    }
+  }
+
+  bool SERIAL(reverse);
+  MouseButtonId SERIAL(buttonId) = MouseButtonId::LEFT;
+  optional<SoundId> SERIAL(soundId);
+  SERIALIZE_ALL(roundBracket(), OPTION(reverse), OPTION(buttonId), OPTION(soundId))
+};
+
+REGISTER_SCRIPTED_UI(ButtonDual);
 
 struct KeyReader {
   SDL::SDL_Keycode key;

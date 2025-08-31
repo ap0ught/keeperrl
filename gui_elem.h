@@ -176,9 +176,9 @@ class GuiFactory {
   SGuiElem standardButton(SGuiElem content, SGuiElem button, bool matchTextWidth = true);
   SGuiElem standardButtonHighlight();
   SGuiElem buttonLabel(const TString&, SGuiElem button, bool matchTextWidth = true,
-      bool centerHorizontally = false, bool unicode = false);
+      bool centerHorizontally = false, bool unicode = false, Color color = Color::WHITE);
   SGuiElem buttonLabel(const TString&, function<void()> button, bool matchTextWidth = true,
-      bool centerHorizontally = false, bool unicode = false);
+      bool centerHorizontally = false, bool unicode = false, Color color = Color::WHITE);
 
   SGuiElem buttonLabelFocusable(SGuiElem content, function<void()> button, function<bool()> focused,
       bool matchTextWidth = true, bool centerHorizontally = false);

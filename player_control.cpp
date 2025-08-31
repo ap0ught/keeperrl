@@ -1234,7 +1234,9 @@ vector<PlayerInfo> PlayerControl::getPlayerInfos(vector<Creature*> creatures) co
       fillEquipment(c, minionInfo);
       if (canControlSingle(c) && !c->getRider())
         minionInfo.actions.push_back(PlayerInfo::Action::CONTROL);
-      if (!collective->hasTrait(c, MinionTrait::PRISONER)) {
+
+      bool isPrisoner = collective->hasTrait(c, MinionTrait::PRISONER);
+      if (!isPrisoner) {
         minionInfo.actions.push_back(PlayerInfo::Action::RENAME);
       } else
         minionInfo.experienceInfo.training.clear();
@@ -1251,6 +1253,9 @@ vector<PlayerInfo> PlayerControl::getPlayerInfos(vector<Creature*> creatures) co
       minionInfo.actions.push_back(PlayerInfo::Action::LOCATE);
       if (collective->usesEquipment(c))
         minionInfo.actions.push_back(PlayerInfo::Action::ASSIGN_EQUIPMENT);
+      if (!isPrisoner && collective->minionCanUseQuarters(c)) {
+        minionInfo.actions.push_back(PlayerInfo::Action::QUARTERS);
+      }
     }
   }
   return minions;
@@ -2866,6 +2871,26 @@ void PlayerControl::processInput(View* view, UserInput input) {
       }
       break;
     }
+    case UserInputId::WORKSHOP_INCREASE_PRIORITY: {
+      auto& info = input.get<WorkshopPriorityInfo>();
+      if (chosenWorkshop && info.adjacentItemIndex < info.itemIndex) {
+        auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
+        bool maxChange = info.maxChangeFunc();
+        int firstIndex = maxChange ? 0 : info.adjacentItemIndex;
+        workshop.changePriority(collective, firstIndex, info.itemIndex, info.itemIndex + info.itemCount); 
+      }
+      break;
+    }
+    case UserInputId::WORKSHOP_DECREASE_PRIORITY: {
+      auto& info = input.get<WorkshopPriorityInfo>();
+      if (chosenWorkshop && info.adjacentItemIndex > info.itemIndex) {
+        auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
+        bool maxChange = info.maxChangeFunc();
+        int lastIndex = maxChange ? workshop.getQueued().size() : info.adjacentItemIndex + info.adjacentItemCount;
+        workshop.changePriority(collective, info.itemIndex, info.adjacentItemIndex, lastIndex); // ..., first, middle, last)
+      }
+      break;
+    }
     case UserInputId::LIBRARY_ADD:
       acquireTech(input.get<TechId>());
       break;
@@ -2970,6 +2995,10 @@ void PlayerControl::processInput(View* view, UserInput input) {
             else
               c->addPermanentEffect(LastingEffect::LOCKED_POSITION);
             break;
+          case PlayerInfo::Action::QUARTERS: {
+            handleQuartersAction(c);
+            break;
+          }
         }
       break;
     }
@@ -3146,6 +3175,67 @@ void PlayerControl::processInput(View* view, UserInput input) {
     default:
       break;
   }
+}
+
+void PlayerControl::handleQuartersAction(Creature* c) {
+  using QI = Zones::QuartersInfo;
+  const auto& finalList = collective->getZones().getAllQuarters(c->getUniqueId());
+  if (finalList.empty()) return;
+
+  ScriptedUIDataElems::Record data;
+  double currentLuxury = collective->getZones().getQuarters(c->getUniqueId()).empty() == false
+    ? finalList[0].luxury // selected creature's quarters will be on top (if it has one)
+    : 0.0; // otherwise 0
+  double reqLuxury = getRequiredLuxury(c->getCombatExperience(false, false));
+  if (reqLuxury > currentLuxury)
+    data.elems["currInsuffLux"] = TString("placeholder"_s);
+  data.elems["title"] = TString(TStringId("QUARTERS_TITLE"));
+  data.elems["currentLuxText"] = TString(TStringId("QUARTERS_CURRENT_LUXURY_LABEL"));
+  data.elems["currentLuxury"] = TString(TSentence("QUARTERS_CURRENT_LUXURY", TString(toString(currentLuxury)), TString(getRequiredLuxury(c->getCombatExperience(false, false)))));
+  data.elems["quarters_header"] = TString(TStringId("QUARTERS_DETAILS_LABEL"));
+  data.elems["owner_header"] = TString(TStringId("QUARTERS_OWNER_LABEL"));
+  data.elems["goto_header"] = TString(TStringId("GOTO_BUTTON_LABEL"));
+  data.elems["goto_text"] = TString(TStringId("GOTO_BUTTON_LABEL"));
+  
+  ScriptedUIDataElems::List list;
+  int idx = 0;
+  int locateIdx = -1, assignIdx = -1;
+  for (const QI& q : finalList) {              
+    ScriptedUIDataElems::Record r;
+    if (reqLuxury > q.luxury)
+      r.elems["insuffLuxury"] = TString(""_s);
+    r.elems["luxury"] = combineWithNoSpace(TStringId("QUARTERS_LUXURY_LABEL"), TString(toString(q.luxury)));
+    const auto& level = q.positions.begin()->getLevel();
+    r.elems["level"] = combineWithNoSpace(TStringId("QUARTERS_LEVEL_LABEL"), TString(level->depth));
+    TString ownerLabel = TString(TStringId("QUARTERS_MENU_UNASSIGNED_LABEL"));
+    if (q.id) {
+      const auto& quartersOwner = getCreature(*q.id);
+      if (q.id == c->getUniqueId()) {
+        r.elems["thisOwner"] = TString("placeholder"_s);
+        r.elems["current"] = TString(TStringId("QUARTERS_CURRENT_LABEL"));
+        ownerLabel = getCreature(*q.id)->getName().aOrTitle();
+      }
+      else {
+        ownerLabel = quartersOwner->getName().aOrTitle();
+      }
+      r.elems["view_id"] = quartersOwner->getViewObject().getViewIdList();
+    }
+    r.elems["owner"] = ownerLabel;
+    auto callbackAssign = [&assignIdx, idx = idx] { assignIdx = idx; return true; };
+    std::function<bool()> callbackLocate = [&locateIdx, idx = idx] { locateIdx = idx; return true; };
+    r.elems["callback"] = ScriptedUIDataElems::Callback { callbackAssign, callbackLocate };
+    list.push_back(std::move(r));
+    ++idx;
+  }
+  data.elems["elems"] = std::move(list);
+  
+  ScriptedUIState state;
+  getView()->scriptedUI("quarters_menu", data, state);
+
+  if (assignIdx > -1)
+    collective->assignQuarters(c, *finalList[assignIdx].positions.begin());
+  else if (locateIdx > -1)
+    setScrollPos(*finalList[locateIdx].positions.begin());
 }
 
 void PlayerControl::scrollStairs(int dir) {
@@ -3460,7 +3550,7 @@ void PlayerControl::onSquareClick(Position pos) {
 }
 
 optional<PlayerControl::QuartersInfo> PlayerControl::getQuarters(Vec2 pos) const {
-  optional<QuartersInfo> ret;
+  optional<QuartersInfo> quartersInfo;
   auto level = getCurrentLevel();
   auto& zones = collective->getZones();
   if (auto info = zones.getQuartersInfo(Position(pos, level))) {
@@ -3478,14 +3568,14 @@ optional<PlayerControl::QuartersInfo> PlayerControl::getQuarters(Vec2 pos) const
         viewId = c->getViewObject().getViewIdList();
         name = c->getName().aOrTitle();
       }
-    ret = QuartersInfo {
+    quartersInfo = QuartersInfo {
       v,
       viewId,
       name,
       luxury
     };
   }
-  return ret;
+  return quartersInfo;
 }
 
 double PlayerControl::getAnimationTime() const {
