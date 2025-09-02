@@ -3206,8 +3206,6 @@ void PlayerControl::handleQuartersAction(Creature* c) {
   data.elems["currentLuxury"] = TString(TSentence("QUARTERS_CURRENT_LUXURY", TString(toString(currentLuxury)), TString(getRequiredLuxury(c->getCombatExperience(false, false)))));
   data.elems["quarters_header"] = TString(TStringId("QUARTERS_DETAILS_LABEL"));
   data.elems["owner_header"] = TString(TStringId("QUARTERS_OWNER_LABEL"));
-  data.elems["goto_header"] = TString(TStringId("GOTO_BUTTON_LABEL"));
-  data.elems["goto_text"] = TString(TStringId("GOTO_BUTTON_LABEL"));
   
   ScriptedUIDataElems::List list;
   int idx = 0;
@@ -3233,8 +3231,8 @@ void PlayerControl::handleQuartersAction(Creature* c) {
       r.elems["view_id"] = quartersOwner->getViewObject().getViewIdList();
     }
     r.elems["owner"] = ownerLabel;
-    auto callbackAssign = [&assignIdx, idx = idx] { assignIdx = idx; return true; };
-    std::function<bool()> callbackLocate = [&locateIdx, idx = idx] { locateIdx = idx; return true; };
+    function<bool()> callbackAssign = [&assignIdx, idx = idx] { assignIdx = idx; return true; };
+    function<bool()> callbackLocate = [&locateIdx, idx = idx] { locateIdx = idx; return true; };
     r.elems["callback"] = ScriptedUIDataElems::Callback { callbackAssign, callbackLocate };
     list.push_back(std::move(r));
     ++idx;
