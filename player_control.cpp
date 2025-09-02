@@ -2873,20 +2873,33 @@ void PlayerControl::processInput(View* view, UserInput input) {
     case UserInputId::WORKSHOP_INCREASE_PRIORITY: {
       auto& info = input.get<WorkshopPriorityInfo>();
       if (chosenWorkshop && info.adjacentItemIndex < info.itemIndex) {
-        auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
         bool maxChange = info.maxChangeFunc();
         int firstIndex = maxChange ? 0 : info.adjacentItemIndex;
-        workshop.changePriority(collective, firstIndex, info.itemIndex, info.itemIndex + info.itemCount); 
+        if (*chosenWorkshop == WorkshopType("FURNACE")) {
+          auto& furnace = collective->getFurnace();
+          furnace.changePriority(firstIndex, info.itemIndex, info.itemIndex + info.itemCount);
+        }
+        else {
+          auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
+          workshop.changePriority(collective, firstIndex, info.itemIndex, info.itemIndex + info.itemCount); 
+        }
       }
       break;
     }
     case UserInputId::WORKSHOP_DECREASE_PRIORITY: {
       auto& info = input.get<WorkshopPriorityInfo>();
       if (chosenWorkshop && info.adjacentItemIndex > info.itemIndex) {
-        auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
         bool maxChange = info.maxChangeFunc();
-        int lastIndex = maxChange ? workshop.getQueued().size() : info.adjacentItemIndex + info.adjacentItemCount;
-        workshop.changePriority(collective, info.itemIndex, info.adjacentItemIndex, lastIndex); // ..., first, middle, last)
+        if (*chosenWorkshop == WorkshopType("FURNACE")) {
+          auto& furnace = collective->getFurnace();
+          int lastIndex = maxChange ? furnace.getQueued().size() : info.adjacentItemIndex + info.adjacentItemCount;
+          furnace.changePriority(info.itemIndex, info.adjacentItemIndex, lastIndex);
+        }
+        else {  
+          auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
+          int lastIndex = maxChange ? workshop.getQueued().size() : info.adjacentItemIndex + info.adjacentItemCount;
+          workshop.changePriority(collective, info.itemIndex, info.adjacentItemIndex, lastIndex);     // ..., first, middle, last)
+        }
       }
       break;
     }
