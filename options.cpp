@@ -455,7 +455,7 @@ void Options::handleIntInterval(OptionId option, ScriptedUIDataElems::Record& da
   auto value = getIntValue(option);
   auto interval = *getIntInterval(option);
   auto range = *getIntRange(option);
-  data.elems.insert({"value", TString(value > 0 ? getValueString(option) : "off"_s)});
+  data.elems.insert({"value", value > 0 ? TString(getValueString(option)) : TStringId("SETTING_OFF")});
   data.elems.insert({"increase", ScriptedUIDataElems::Callback{
       [this, &wasSet, option, value, interval, range] {
         auto newVal = value + interval;
