@@ -12,6 +12,7 @@ TString::TString(TSentence id) : text(std::move(id)) {}
 TString::TString(TStringId id) : text(TSentence(std::move(id))) {}
 TString::TString() : text(string()) {}
 TString::TString(int i) : TString(toString(i)) {}
+TString::TString(double i) : TString(toString(i)) {}
 TString::TString(TimeInterval i) : TString(toString(i)) {}
 TString::TString(GlobalTime i) : TString(toString(i)) {}
 
