@@ -169,7 +169,7 @@ void LastingEffects::onAffected(Creature* c, LastingEffect effect, bool msg) {
         break;
       case LastingEffect::HALLU:
         if (!c->isAffected(LastingEffect::BLIND))
-          c->privateMessage(TStringId("THE_WORLD_EXPLODES_INTO_COLORS"));
+          c->privateMessage(TStringId("HALLUCINATION_MESSAGE"));
         else
           c->privateMessage(TStringId("HALLU_WHILE_BLIND_MESSAGE"));
         break;
