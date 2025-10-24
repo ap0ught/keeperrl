@@ -132,6 +132,8 @@ void Body::setHumanoid(bool h) {
 }
 
 vector<pair<Item*, double>> Body::chooseRandomWeapon(vector<Item*> weapons, vector<double> multipliers) const {
+  if (!xhumanoid)
+    weapons.clear();
   vector<pair<Item*, double>> ret;
   for (auto part : ENUM_ALL(BodyPart))
     for (auto& attack : intrinsicAttacks[part])
