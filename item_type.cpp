@@ -43,7 +43,7 @@ ItemType ItemType::claws(int damage) {
 
 ItemType ItemType::beak(int damage) {
   return ItemType(ItemTypes::Intrinsic{ViewId("beak_attack"), TStringId("BEAK_ATTACK"), damage,
-        WeaponInfo{false, AttackType::HIT, AttrType("DAMAGE"), {}, {}, AttackMsg::BITE}});
+        WeaponInfo{false, AttackType::HIT, AttrType("DAMAGE"), {}, {}, AttackMsg::PECK}});
 }
 
 ItemType ItemType::fists(int damage) {
