@@ -26,6 +26,7 @@
 #include "creature_id.h"
 #include "achievement_id.h"
 #include "task.h"
+#include "creature_predicate.h"
 
 enum class ItemClass;
 
@@ -50,7 +51,7 @@ struct GuardianInfo {
 
 struct MinionActivityInfo {
   enum Type { FURNITURE, EXPLORE, COPULATE, EAT, SPIDER, WORKER, ARCHERY, IDLE, MINION_ABUSE, GUARD1, GUARD2, GUARD3,
-      CONFESSION } type;
+      CONFESSION, BEING_COOKED } type;
   MinionActivityInfo();
   MinionActivityInfo(FurnitureType, Task::SearchType = Task::SearchType::RANDOM_CLOSE);
   MinionActivityInfo(BuiltinUsageId);
@@ -75,7 +76,7 @@ struct FloorInfo {
 class CollectiveConfig {
   public:
   static CollectiveConfig keeper(TimeInterval immigrantInterval, int maxPopulation, TString populationString,
-      bool prisoners, ConquerCondition, bool requireQuartersForExp);
+      bool prisoners, optional<CreaturePredicate> prisonerPredicate, ConquerCondition, bool requireQuartersForExp);
   static CollectiveConfig noImmigrants();
 
   bool isLeaderFighter() const;
@@ -99,6 +100,7 @@ class CollectiveConfig {
   bool xCanEnemyRetire() const;
   CollectiveConfig& setConquerCondition(ConquerCondition);
   bool canCapturePrisoners() const;
+  bool canCapturePrisoner(const Creature*) const;
   bool alwaysMountSteeds() const;
   bool minionsRequireQuarters() const;
 
@@ -116,6 +118,8 @@ class CollectiveConfig {
   ~CollectiveConfig();
 
   optional<AchievementId> SERIAL(discoverAchievement);
+
+  optional<CreaturePredicate> SERIAL(prisonerPredicate) = none;
 
   private:
   enum CollectiveType { KEEPER, VILLAGE };
@@ -135,3 +139,5 @@ class CollectiveConfig {
   bool SERIAL(alwaysMount) = false;
   bool SERIAL(requireQuartersForExp) = true;
 };
+
+CEREAL_CLASS_VERSION(CollectiveConfig, 1)

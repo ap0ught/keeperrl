@@ -8,6 +8,7 @@
 #include "villain_group.h"
 #include "keeper_base_info.h"
 #include "t_string.h"
+#include "creature_predicate.h"
 
 class SpecialTrait;
 
@@ -31,6 +32,7 @@ struct KeeperCreatureInfo {
   TString SERIAL(populationString) = TStringId("POPULATION");
   bool SERIAL(noLeader) = false;
   bool SERIAL(prisoners) = true;
+  optional<CreaturePredicate> SERIAL(prisonerPredicate) = none;
   vector<string> SERIAL(endlessEnemyGroups) = {"basic"};
   optional<string> SERIAL(unlock);
   vector<CostInfo> SERIAL(credit);
@@ -45,3 +47,5 @@ struct KeeperCreatureInfo {
 };
 
 static_assert(std::is_nothrow_move_constructible<KeeperCreatureInfo>::value, "T should be noexcept MoveConstructible");
+
+CEREAL_CLASS_VERSION(KeeperCreatureInfo, 1)

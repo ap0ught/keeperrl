@@ -16,6 +16,7 @@
   "enchanted_water" { ClearFurniture Place "ENCHANTED_WATER"}
   "enchanted_workshop" { Place "ENCHANTED_WORKSHOP"}
   "enchanted_lab" { Place "ENCHANTED_LABORATORY"}
+  "witch_cauldron" { Place "WITCH_LABORATORY"}
   "lava" { ClearFurniture Place "MAGMA"}
   "stockpile" Stockpile 0
   "bed" Place "BED1"
@@ -68,7 +69,9 @@
   "fog" AddGas "FOG"
   "spider_web" Place "SPIDER_WEB"
   "connect" { RemoveFlag NO_DIG Flag CONNECT_CORRIDOR }
+  "no_dig" Flag NO_DIG
   "prison_bars" PlaceHostile "PRISON_BARS"
+  "prison_door_unlocked" PlaceHostile "PRISON_DOOR"
   "prison_door" PlaceHostile "PRISON_DOOR_LOCKED"
   "prison" Place "PRISON"
   "ant_worker" HostileCreature "ANT_WORKER"
@@ -78,6 +81,17 @@
   "gargoyle" Place "GARGOYLE_TRAP"
   "workshop" Place "WORKSHOP"
   "special_tree" Place "SPECIAL_TREE"
+  "haunted_tree" Place "HAUNTED_TREE"
+  "haunted_tree2" Place "HAUNTED_TREE2"
+  "haunted_tree3" Place "HAUNTED_TREE3"
+  "haunted_tree4" Place "HAUNTED_TREE4"
+  "haunted_tree5" Place "HAUNTED_TREE5"
+  "haunted_tree6" Place "HAUNTED_TREE6"
+  "haunted_tree7" Place "HAUNTED_TREE7"
+  "haunted_tree8" Place "HAUNTED_TREE8"
+  "haunted_effigy" Place "HAUNTED_EFFIGY"
+  "haunted_effigy2" Place "HAUNTED_EFFIGY2"
+  "haunted_effigy3" Place "HAUNTED_EFFIGY3"
 }
 
 "z_level_hell" inherit "default" append {

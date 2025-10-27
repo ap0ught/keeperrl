@@ -229,6 +229,9 @@ void LastingEffects::onAffected(Creature* c, LastingEffect effect, bool msg) {
       case LastingEffect::SPYING:
         c->verb(TStringId("YOU_PUT_ON_SUNGLASSES"), TStringId("PUTS_ON_SUNGLASSES"), TString(his(c->getAttributes().getGender())));
         break;
+      case LastingEffect::WITCH:
+        c->verb(TStringId("YOU_TURN_INTO_WOMAN"), TStringId("TURNS_INTO_WOMAN"), TString(his(c->getAttributes().getGender())));
+        break;
       case LastingEffect::IMMOBILE:
         c->verb(TStringId("YOU_CANT_MOVE_ANYMORE"), TStringId("CANT_MOVE_ANYMORE"));
         break;
@@ -363,6 +366,9 @@ void LastingEffects::onTimedOut(Creature* c, LastingEffect effect, bool msg) {
     case LastingEffect::SPYING:
       c->setAlternativeViewId(none);
       break;
+    case LastingEffect::WITCH:
+      c->setAlternativeViewId(none);
+      break;
     case LastingEffect::OIL:
       c->removeEffect(LastingEffect::ON_FIRE);
       break;
@@ -481,6 +487,9 @@ void LastingEffects::onTimedOut(Creature* c, LastingEffect effect, bool msg) {
       case LastingEffect::SPYING:
         c->verb(TStringId("YOU_REMOVE_SUNGLASSES"), TStringId("REMOVES_SUNGLASSES"), TString(his(c->getAttributes().getGender())));
         break;
+      case LastingEffect::WITCH:
+        c->verb(TStringId("YOU_TURN_BACK_INTO_WITCH"), TStringId("TURNS_BACK_INTO_WITCH"), TString(his(c->getAttributes().getGender())));
+        break;
       case LastingEffect::LIFE_SAVED:
         c->verb(TStringId("YOUR_LIFE_WILL_NO_LONGER_BE_SAVED"), TStringId("HIS_LIFE_WILL_NO_LONGER_BE_SAVED"));
         break;
@@ -533,7 +542,8 @@ int LastingEffects::getAttrBonus(const Creature* c, AttrType type) {
   int value = 0;
   auto time = c->getGlobalTime();
   auto modifyWithSpying = [c, time](int& value) {
-    if (c->hasAlternativeViewId() && c->isAffected(LastingEffect::SPYING, time))
+    if (c->hasAlternativeViewId() &&
+        (c->isAffected(LastingEffect::SPYING, time) || c->isAffected(LastingEffect::WITCH, time)))
       value -= 99;
     else
       if (auto rider = c->getRider())
@@ -548,11 +558,11 @@ int LastingEffects::getAttrBonus(const Creature* c, AttrType type) {
     if (c->isAffected(LastingEffect::SWARMER, time))
       value += c->getPosition().countSwarmers() - 1;
     modifyWithSpying(value);
-  } else
-  if (type == rangedDamageType || type == spellDamageType) {
+  }
+  else if (type == rangedDamageType || type == spellDamageType) {
     modifyWithSpying(value);
-  } else
-  if (type == defenseType) {
+  }
+  else if (type == defenseType) {
     if (c->isAffected(LastingEffect::SWARMER, time))
       value += c->getPosition().countSwarmers() - 1;
   }
@@ -608,6 +618,7 @@ static Adjective getAdjective(LastingEffect effect) {
     case LastingEffect::CAN_DANCE: return "BUFF_ADJECTIVE_CAN_DANCE"_good;
     case LastingEffect::STEED: return "BUFF_ADJECTIVE_STEED"_good;
     case LastingEffect::RIDER: return "BUFF_ADJECTIVE_RIDER"_good;
+    case LastingEffect::WITCH: return "BUFF_ADJECTIVE_WITCH"_good;
 
     case LastingEffect::PANIC: return "BUFF_ADJECTIVE_PANIC"_bad;
     case LastingEffect::PEACEFULNESS: return "BUFF_ADJECTIVE_PEACEFULNESS"_bad;
@@ -781,6 +792,11 @@ bool LastingEffects::tick(Creature* c, LastingEffect effect) {
         if (!enemyId && c->hasAlternativeViewId())
           c->setAlternativeViewId(none);
       }
+      break;
+    }
+    case LastingEffect::WITCH: {
+      if (!c->hasAlternativeViewId())
+        c->setAlternativeViewId(ViewId("witch_girl"));
       break;
     }
     case LastingEffect::ON_FIRE:
@@ -988,6 +1004,7 @@ TString LastingEffects::getName(LastingEffect type) {
     case LastingEffect::STEED: return TStringId("BUFF_STEED");
     case LastingEffect::RIDER: return TStringId("BUFF_RIDER");
     case LastingEffect::LOCKED_POSITION: return TStringId("BUFF_LOCKED_POSITION");
+    case LastingEffect::WITCH: return TStringId("BUFF_WITCH");
   }
 }
 
@@ -1052,7 +1069,8 @@ TString LastingEffects::getDescription(LastingEffect type) {
     case LastingEffect::CAN_DANCE: return TStringId("BUFF_DESC_CAN_DANCE");
     case LastingEffect::STEED: return TStringId("BUFF_DESC_STEED");
     case LastingEffect::RIDER: return TStringId("BUFF_DESC_RIDER");
-   case LastingEffect::LOCKED_POSITION: return TStringId("BUFF_DESC_LOCKED_POSITION");
+    case LastingEffect::LOCKED_POSITION: return TStringId("BUFF_DESC_LOCKED_POSITION");
+    case LastingEffect::WITCH: return TStringId("BUFF_DESC_WITCH");
   }
 }
 
@@ -1068,7 +1086,12 @@ bool LastingEffects::modifyIsEnemyResult(const Creature* c, const Creature* othe
   auto isSpy = [&] (const Creature* c) {
     return c->isAffected(LastingEffect::SPYING, time) && c->hasAlternativeViewId();
   };
-  if (c->isAffected(LastingEffect::PEACEFULNESS, time) || isSpy(c) || isSpy(other))
+  if (c->isAffected(LastingEffect::PEACEFULNESS, time) ||
+      isSpy(c) ||
+      isSpy(other) ||
+      c->isAffected(LastingEffect::WITCH) ||
+      other->isAffected(LastingEffect::WITCH)
+  )
     return false;
   if (c->isAffected(LastingEffect::INSANITY, time) && !other->getStatus().contains(CreatureStatus::LEADER)
       && !other->isAffected(LastingEffect::PSYCHIATRY))

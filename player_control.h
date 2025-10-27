@@ -151,6 +151,7 @@ class PlayerControl : public CreatureView, public CollectiveControl, public Even
   void considerWarning();
   void considerAllianceAttack();
   void considerNewAttacks();
+  void updateWitchCauldrons();
 
   TribeId getTribeId() const;
   bool canSee(const Creature*) const;

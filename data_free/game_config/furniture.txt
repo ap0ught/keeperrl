@@ -149,6 +149,11 @@ TRAINING("_DWARF", "_dwarf")
   usagePredicate = Not Area 1 Not FurnitureType "ENCHANTED_WATER"
   upgrade = "LABORATORY"
 }
+"WITCH_LABORATORY" inherit "LABORATORY"
+{
+  name = FURNITURE_WITCH_LAB_NAME
+  viewId = { "cauldron_empty" }
+}
 "MORTAR_AND_PESTLE"
 {
   name = FURNITURE_MORTAR_AND_PESTLE_NAME
@@ -1125,6 +1130,51 @@ Def BedHeal() Heal { FLESH 0.005 } End
 "SWAMPTREE" inherit "CANIF_TREE"
 {
   viewId = { "swamptree" }
+}
+"HAUNTED_TREE" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree" }
+}
+"HAUNTED_TREE2" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree2" }
+}
+"HAUNTED_TREE3" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree3" }
+}
+"HAUNTED_TREE4" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree4" }
+}
+"HAUNTED_TREE5" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree5" }
+}
+"HAUNTED_TREE6" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree6" }
+}
+"HAUNTED_TREE7" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree7" }
+}
+"HAUNTED_TREE8" inherit "CANIF_TREE"
+{
+  viewId = { "haunted_tree8" }
+}
+"HAUNTED_EFFIGY"
+{
+  name = FURNITURE_EFFIGY_NAME
+  viewId = { "haunted_effigy" }
+}
+"HAUNTED_EFFIGY2" inherit "HAUNTED_EFFIGY"
+{
+  viewId = { "haunted_effigy2" }
+}
+"HAUNTED_EFFIGY3" inherit "HAUNTED_EFFIGY"
+{
+  viewId = { "haunted_effigy3" }
 }
 "CACTUS1" inherit "CANIF_TREE"
 {

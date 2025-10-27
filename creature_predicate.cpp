@@ -224,6 +224,14 @@ static TString getName(FurnitureType, const ContentFactory*) {
   return TStringId("FURNITURE");
 }
 
+static bool apply(const CreaturePredicates::AnyFurniture l, Position pos, const Creature* attacker) {
+  return !!pos.getFurniture(l);
+}
+
+static TString getName(const CreaturePredicates::AnyFurniture, const ContentFactory*) {
+  return TStringId("FURNITURE");
+}
+
 static bool apply(CreaturePredicates::ContainsGas type, Position pos, const Creature* attacker) {
   return pos.getGasAmount(type) > 0;
 }
@@ -285,6 +293,22 @@ static bool apply(CreaturePredicates::CanCreatureEnter, Position position, const
 
 static TString getName(const CreaturePredicates::CanCreatureEnter, const ContentFactory*) {
   return TStringId("CAN_ENTER_POSITION");
+}
+
+static bool apply(CreaturePredicates::IsWater, Position position, const Creature*) {
+  return position.canEnter({MovementTrait::SWIM});
+}
+
+static TString getName(const CreaturePredicates::IsWater, const ContentFactory*) {
+  return TString(""_s);
+}
+
+static bool apply(CreaturePredicates::IsDeepWater, Position position, const Creature*) {
+  return position.canEnter({MovementTrait::SWIM}) && !position.canEnter({MovementTrait::WADE});
+}
+
+static TString getName(const CreaturePredicates::IsDeepWater, const ContentFactory*) {
+  return TString(""_s);
 }
 
 static bool apply(CreaturePredicates::Frequency f, Position position, const Creature*) {

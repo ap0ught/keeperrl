@@ -44,6 +44,13 @@ bool Clock::isChristmas() {
   return month == 12 && (day >= 19 && day <= 26);
 }
 
+bool Clock::isHalloween() {
+  time_t t = time(NULL);
+  int day = localtime(&t)->tm_mday;
+  int month = localtime(&t)->tm_mon + 1;
+  return month == 10 && (day >= 27);
+}
+
 steady_clock::time_point Clock::getCurrent() {
   return steady_clock::time_point(steady_clock::now() - initTime);
 }

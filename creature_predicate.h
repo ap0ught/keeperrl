@@ -35,6 +35,8 @@ SIMPLE_PREDICATE(CanCreatureEnter);
 SIMPLE_PREDICATE(SameTribe);
 SIMPLE_PREDICATE(HasAnyHealth);
 SIMPLE_PREDICATE(IsPlayer);
+SIMPLE_PREDICATE(IsWater);
+SIMPLE_PREDICATE(IsDeepWater);
 
 struct HatedBy {
   BuffId SERIAL(effect);
@@ -164,6 +166,7 @@ struct ExperienceBelow {
 };
 
 using ContainsGas = TileGasType;
+using AnyFurniture = FurnitureLayer;
 
 #define CREATURE_PREDICATE_LIST\
   X(Enemy, 0)\
@@ -212,6 +215,9 @@ using ContainsGas = TileGasType;
   X(EquipedIngredient, 43)\
   X(ExperienceBelow, 44)\
   X(IsPlayer, 45)\
+  X(IsWater, 46)\
+  X(IsDeepWater, 47)\
+  X(AnyFurniture, 48)
 
 #define VARIANT_NAME CreaturePredicate
 #define VARIANT_TYPES_LIST CREATURE_PREDICATE_LIST

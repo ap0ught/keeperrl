@@ -335,7 +335,8 @@ class CollectiveInfo {
     ViewId HASH(viewId);
     TString HASH(name);
     TString HASH(description);
-    HASH_ALL(viewId, name, description);
+    optional<ScriptedUIId> HASH(descriptionUI);
+    HASH_ALL(viewId, name, description, descriptionUI);
   };
   struct MinionPromotionInfo {
     ViewIdList HASH(viewId);

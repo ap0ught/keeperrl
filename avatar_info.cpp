@@ -246,7 +246,7 @@ AvatarInfo getQuickGameAvatar(View* view, const KeeperCreatureInfo& myKeeper,
   AvatarInfo ret;
   ret.playerCreature = creatureFactory->fromId(myKeeper.creatureId[0], TribeId::getDarkKeeper());
   if (!myKeeper.noLeader)
-    ret.playerCreature->getName().setBare(TStringId("KEEPER"));
+    ret.playerCreature->getName().setBare(TStringId("KEEPER_F"));
   ret.playerCreature->getName().setFirst("Jollibrond"_s);
   ret.creatureInfo = std::move(myKeeper);
   ret.tribeAlignment = myKeeper.tribeAlignment;

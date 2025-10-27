@@ -45,6 +45,7 @@ class CreatureFactory {
   PCreature makeCopy(Creature*);
   static PController getShopkeeper(vector<Vec2> shopArea, Creature*);
   PCreature getAnimatedItem(const ContentFactory*, PItem, TribeId, int attrBonus);
+  PCreature getAnimatedFurniture(const ContentFactory*, const Furniture*, TribeId, int attrBonus);
   static PCreature getHumanForTests();
   PCreature getGhost(Creature*);
   static PCreature getIllusion(Creature*);

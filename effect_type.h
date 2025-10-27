@@ -39,7 +39,7 @@ namespace Effects {
 }
 
 RICH_ENUM(Effects::EnhanceType, WEAPON, ARMOR);
-RICH_ENUM(Effects::AnimatedItemType, WEAPON, CORPSE);
+RICH_ENUM(Effects::AnimatedItemType, WEAPON, CORPSE, SMALL_ITEMS, MEDIUM_ITEMS);
 
 namespace Effects {
 struct Escape {
@@ -86,7 +86,9 @@ struct Summon {
   CreatureId SERIAL(creature);
   Range SERIAL(count);
   optional<int> SERIAL(ttl);
-  SERIALIZE_ALL(creature, count, ttl)
+  bool getsKillCredit = true;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int version);
 };
 struct SummonAway : Summon {
   EnumSet<MinionTrait> SERIAL(traits);
@@ -284,6 +286,13 @@ struct AnimateItems {
   Range SERIAL(time);
   AnimatedItemType SERIAL(type);
   SERIALIZE_ALL(maxCount, radius, time, type)
+};
+struct AnimateFurniture {
+  int SERIAL(maxCount);
+  int SERIAL(radius);
+  Range SERIAL(time);
+  bool SERIAL(walls);
+  SERIALIZE_ALL(maxCount, radius, time, walls)
 };
 struct DropItems {
   ItemType SERIAL(type);
@@ -529,7 +538,8 @@ SIMPLE_EFFECT(SummonMinions);
   X(SummonAway, 102)\
   X(Banish, 103)\
   X(ChooseRandomUntilSuccessful, 104)\
-  X(SummonMinions, 105)
+  X(SummonMinions, 105)\
+  X(AnimateFurniture, 106)
 
 #define VARIANT_TYPES_LIST EFFECT_TYPES_LIST
 #define VARIANT_NAME EffectType
@@ -548,3 +558,5 @@ class EffectType : public Effects::EffectType {
   public:
   using Effects::EffectType::EffectType;
 };
+
+CEREAL_CLASS_VERSION(Effects::Summon, 1)

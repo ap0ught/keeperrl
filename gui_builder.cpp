@@ -3035,18 +3035,24 @@ SGuiElem GuiBuilder::drawLibraryContent(const CollectiveInfo& collectiveInfo, co
         vector<SGuiElem> lines = {WL(label, TSentence("PROMOTION_TYPE_LABEL"))};
         vector<function<void()>> callbacks = { nullptr };
         optional<int> ret;
+        ScriptedUIData scriptedData;
+        ScriptedUIState scriptedState;
         for (int i : All(options)) {
           callbacks.push_back([&ret, i] { ret = i;});
+          auto description = options[i].descriptionUI
+              ? WL(tooltip2, WL(scripted, []{}, *options[i].descriptionUI, scriptedData, scriptedState),
+                  [](Rectangle rect){ return rect.topRight(); })
+              : WL(tooltip, {TSentence("MAKE_SENTENCE", options[i].description)});
           lines.push_back(WL(stack,
                 WL(getListBuilder)
                     .addElemAuto(WL(viewObject, options[i].viewId))
                     .addSpace(10)
                     .addElemAuto(WL(label, options[i].name))
                     .buildHorizontalList(),
-                WL(tooltip, {TSentence("MAKE_SENTENCE", options[i].description)})
+                std::move(description)
                 ));
         }
-        drawMiniMenu(std::move(lines), std::move(callbacks), {}, bounds.bottomLeft(), 200, false);
+        drawMiniMenu(std::move(lines), std::move(callbacks), {}, bounds.bottomLeft(), 260, false);
         if (ret)
           this->callbacks.input({UserInputId::CREATURE_PROMOTE, PromotionActionInfo{id, *ret}});
       };
@@ -3917,6 +3923,7 @@ static TString getTaskText(MinionActivity option) {
     case MinionActivity::BE_WHIPPED: return TStringId("BE_WHIPPED_MINION_ACTIVITY");
     case MinionActivity::BE_TORTURED: return TStringId("BE_TORTURED_MINION_ACTIVITY");
     case MinionActivity::BE_EXECUTED: return TStringId("BE_EXECUTED_MINION_ACTIVITY");
+    case MinionActivity::WITCH_CAULDRON: return TStringId("BE_COOKED_MINION_ACTIVITY");
     case MinionActivity::PHYLACTERY: return TStringId("PHYLACTERY_MINION_ACTIVITY");
     case MinionActivity::PREACHING: return TStringId("PREACHING_MINION_ACTIVITY");
     case MinionActivity::MASS: return TStringId("MASS_MINION_ACTIVITY");
@@ -3955,6 +3962,7 @@ static ViewId getViewId(MinionActivity option) {
     case MinionActivity::BE_WHIPPED: return ViewId("whipping_post");
     case MinionActivity::BE_TORTURED: return ViewId("torture_table");
     case MinionActivity::BE_EXECUTED: return ViewId("gallows");
+    case MinionActivity::WITCH_CAULDRON: return ViewId("cauldron");
     case MinionActivity::PHYLACTERY: return ViewId("phylactery");
     case MinionActivity::PREACHING: return ViewId("rostrum_wood");
     case MinionActivity::MASS: return ViewId("pew_wood");

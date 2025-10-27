@@ -13,6 +13,7 @@ class Clock {
   static milliseconds getRealMillis();
   static microseconds getRealMicros();
   static bool isChristmas();
+  static bool isHalloween();
 
   private:
   steady_clock::time_point getCurrent();

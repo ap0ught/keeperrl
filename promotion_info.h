@@ -9,8 +9,9 @@ struct PromotionInfo {
   TString SERIAL(name);
   ViewId SERIAL(viewId);
   optional<TStringId> SERIAL(message);
+  optional<ScriptedUIId> SERIAL(descriptionUI);
   template <typename Archive>
   void serialize(Archive&, unsigned int);
 };
 
-CEREAL_CLASS_VERSION(PromotionInfo, 1);
+CEREAL_CLASS_VERSION(PromotionInfo, 2);

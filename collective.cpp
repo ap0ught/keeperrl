@@ -1532,6 +1532,11 @@ void Collective::onAppliedSquare(Creature* c, pair<Position, FurnitureLayer> pos
       taskMap->addTask(Task::kill(c), pos.first, MinionActivity::WORKING);
     if (furniture->getType() == FurnitureType("TORTURE_TABLE"))
       taskMap->addTask(Task::torture(c), pos.first, MinionActivity::WORKING);
+    if (furniture->getType() == FurnitureType("WITCH_LABORATORY") && c->getStatus().contains(CreatureStatus::PRISONER)) {
+      control->addMessage(TStringId("A_CHILD_IS_COOKED"));
+      c->dieNoReason(Creature::DropType::ONLY_INVENTORY);
+      returnResource(CostInfo(CollectiveResourceId("COOKED_CHILDREN"), 1));
+    }
     if (furniture->getType() == FurnitureType("POETRY_TABLE") && Random.chance(0.01 * efficiency)) {
       auto poem = ItemType(ItemTypes::Poem{}).get(contentFactory);
       bool demon = Random.roll(500);

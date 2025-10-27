@@ -336,6 +336,7 @@ End
   range = 6
 #    endOnly = true
   cooldown = {5 21}
+  endOnly = true
   sound = "SPELL_BLAST"
 }
 "circular blast"
@@ -836,6 +837,7 @@ Def NoEffect() Unlock "nothing" End
   symbol = "😈"
   effect = Lasting 30 INSANITY
   cooldown = 5
+  range = 10
 }
 "tengu teleport"
 {
@@ -939,4 +941,116 @@ End
   symbol = "👑"
   effect = Name SPELLS_BISHOP_AUDIENCE_EFFECT Description SPELLS_BISHOP_AUDIENCE_EFFECT1 Filter CreatureStatus LEADER SummonMinions
   cooldown = {50 101}
+}
+"illness"
+{
+  symbol = "☣"
+  effect = Lasting PLAGUE
+  range = 5
+  cooldown = {10 20}
+  endOnly = true
+}
+"insanity"
+{
+  symbol = "😈"
+  effect = Lasting 100 INSANITY
+  range = 5
+  cooldown = {10 20}
+  endOnly = true
+}
+"bleeding"
+{
+  symbol = "💦"
+  effect = Lasting 100 BLEEDING
+  range = 5
+  cooldown = {10 20}
+  endOnly = true
+}
+"spider infestation"
+{
+  symbol = "🕷️"
+  effect = Summon "SPIDER" noKillCredit {5 8} 60
+  cooldown = {30 50}
+}
+"snake infestation"
+{
+  symbol = "🐍"
+  effect = Summon "SNAKE" noKillCredit {5 8} 60
+  cooldown = {30 50}
+}
+"lizard infestation"
+{
+  symbol = "🐉"
+  effect = Summon "GIANT_LIZARD" noKillCredit {2 5} 60
+  cooldown = {30 50}
+}
+"summon kraken"
+{
+  symbol = "🐙"
+  effect = Description SUMMON_SINGLE_EFFECT_DESCRIPTION(KRAKEN) {
+    SetFlag "placed kraken" false
+    Area 8 Filter IsDeepWater {
+      Filter Not Flag "placed kraken" {
+        Summon "KRAKEN" noKillCredit 1 200
+        SetFlag "placed kraken" true
+      }
+    }
+    Area 8 Filter IsWater {
+      Filter Not Flag "placed kraken" {
+        Summon "KRAKEN" noKillCredit 1 200
+        SetFlag "placed kraken" true
+      }
+    }
+  }
+  cooldown = {100 200}
+}
+"polymorph other"
+{
+  symbol = "⇌"
+  effect = Polymorph none none
+  cooldown = {10 20}
+  range = 5
+  endOnly = true
+}
+"girl polymorph"
+{
+  symbol = "👧"
+  effect = AI And {} 1 -1 Lasting 100 WITCH
+  cooldown = {200}
+}
+"strix polymorph"
+{
+  symbol = "🐦"
+  effect = AI And {} 1 -1 Polymorph "STRIX" 40
+  cooldown = {80}
+}
+"night hag polymorph"
+{
+  symbol = "👹"
+  effect = AI And {} 1 -1 Polymorph "NIGHT_HAG" 40
+  cooldown = {80}
+}
+"animate small items"
+{
+  symbol = "🔪"
+  effect = AnimateItems 5 5 10 SMALL_ITEMS
+  cooldown = {20}
+}
+"animate medium items"
+{
+  symbol = "📚"
+  effect = AnimateItems 5 5 20 MEDIUM_ITEMS
+  cooldown = {40}
+}
+"animate furniture"
+{
+  symbol = "🛏️"
+  effect = AI And {} 1 -1 AnimateFurniture 6 5 30 false
+  cooldown = {60}
+}
+"animate walls"
+{
+  symbol = "🏠"
+  effect = AI And {} 1 -1 AnimateFurniture 10 5 30 true
+  cooldown = {60}
 }

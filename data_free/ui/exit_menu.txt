@@ -9,14 +9,12 @@ Def IconButton(Id, Text)
 End
 
 Def IconButtonInactive(Id, Text)
-  StandardButtonInactive(
-    Vertical {
-      ViewId(5, {Id})
-      Height 10 {}
-      Position(MIDDLE, Label(text = Text color = ColorId LIGHT_GRAY))
-      Height 10 {}
-    }
-  )
+  Vertical {
+    Height 140 Width 140 StandardButtonInactive(ViewId(5, {Id}))
+    Height 10 {}
+    Position(MIDDLE, Label(text = Text color = ColorId LIGHT_GRAY))
+    Height 10 {}
+  }
 End
 
 {

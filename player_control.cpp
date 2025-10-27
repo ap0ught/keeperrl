@@ -143,6 +143,8 @@ PPlayerControl PlayerControl::create(Collective* col, vector<TString> introText,
   auto ret = makeOwner<PlayerControl>(Private{}, col, alignment);
   ret->subscribeTo(col->getModel());
   ret->introText = introText;
+  for (auto v : col->getKnownTiles().getAll())
+    ret->addToMemory(v);
   return ret;
 }
 
@@ -578,7 +580,7 @@ static ItemInfo getEmptySlotItem(EquipmentSlot slot, bool locked) {
 }
 
 static CollectiveInfo::PromotionOption getPromotionOption(const ContentFactory* factory, const PromotionInfo& info) {
-  return {info.viewId, info.name, info.applied.getDescription(factory)};
+  return {info.viewId, info.name, info.applied.getDescription(factory), info.descriptionUI};
 }
 
 void PlayerControl::fillPromotions(Creature* creature, CollectiveInfo& info) const {
@@ -1294,7 +1296,8 @@ void PlayerControl::fillMinions(CollectiveInfo& info) const {
     if (c->isAffected(LastingEffect::STEED) && !minions.contains(c))
       minions.push_back(c);
   info.minionGroups = getCreatureGroups(minions);
-  info.automatonGroups = getAutomatonGroups(minions);
+  if (collective->getConfig().getMaxPopulation() > 1)
+    info.automatonGroups = getAutomatonGroups(minions);
   info.minions = minions.transform([](const Creature* c) { return CreatureInfo(c) ;});
   info.minionCount = collective->getPopulationSize();
   info.minionLimit = collective->getMaxPopulation();
@@ -2328,7 +2331,7 @@ void PlayerControl::getSquareViewIndex(Position pos, bool canSee, ViewIndex& ind
       auto& object = index.getObject(ViewLayer::CREATURE);
       if (isEnemy(c)) {
         object.setModifier(ViewObject::Modifier::HOSTILE);
-        if (c->canBeCaptured() && collective->getConfig().canCapturePrisoners())
+        if (c->canBeCaptured() && collective->getConfig().canCapturePrisoner(c))
           object.setClickAction(c->isCaptureOrdered() ?
               ViewObjectAction::CANCEL_CAPTURE_ORDER : ViewObjectAction::ORDER_CAPTURE);
       } else
@@ -2890,7 +2893,7 @@ void PlayerControl::processInput(View* view, UserInput input) {
           else
             setChosenTeam(*chosenTeam, c->getUniqueId());
         } else
-        if (collective->getConfig().canCapturePrisoners() && collective->getTribe()->isEnemy(c))
+        if (collective->getConfig().canCapturePrisoner(c) && collective->getTribe()->isEnemy(c))
           c->toggleCaptureOrder();
       }
       break;
@@ -3687,7 +3690,7 @@ void PlayerControl::considerTogglingCaptureOrderOnMinions() const {
       toCapture.push_back(c);*/
   for (auto c : toCapture)
     for (auto col : c->getPosition().getModel()->getCollectives())
-      if (col != collective && col->getConfig().canCapturePrisoners() && !col->isConquered())
+      if (col != collective && col->getConfig().canCapturePrisoner(c) && !col->isConquered())
         for (auto pos : col->getTerritory().getPillagePositions())
           if (pos.getCreature() == c)
             c->setCaptureOrder(true);
@@ -3825,6 +3828,24 @@ void PlayerControl::considerSoloAchievement() {
   }
 }
 
+void PlayerControl::updateWitchCauldrons() {
+  if (!getGame()->getContentFactory()->resourceInfo.count(CollectiveResourceId("COOKED_CHILDREN")))
+    return;
+  bool cauldronFull = collective->numResource(CollectiveResourceId("COOKED_CHILDREN")) > 0;
+  if (collective->getWorkshops().types.count(WorkshopType("WITCH_LABORATORY")))
+    for (auto& elem : collective->getWorkshops().types.at(WorkshopType("WITCH_LABORATORY")).getQueued())
+      if (elem.paid) {
+        cauldronFull = true;
+        break;
+      }
+  ViewId viewId(cauldronFull ? "cauldron" : "cauldron_empty");
+  for (auto pos : collective->getConstructions().getBuiltPositions(FurnitureType("WITCH_LABORATORY"))) {
+    pos.modFurniture(FurnitureLayer::MIDDLE)->getViewObject()->setId(viewId);
+    pos.setNeedsRenderAndMemoryUpdate(true);
+    updateSquareMemory(pos);
+  }
+}
+
 void PlayerControl::tick() {
   prisonSizeCache.clear();
   collective->getConstructions().checkDebtConsistency();
@@ -3857,6 +3878,7 @@ void PlayerControl::tick() {
       hints[numHint] = TString();
     }
   }
+  updateWitchCauldrons();
 }
 
 bool PlayerControl::canSee(const Creature* c) const {
