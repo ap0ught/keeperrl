@@ -74,7 +74,7 @@ All source files must include the GPL v2 license header:
 - **Naming**:
   - Classes/Types: PascalCase (e.g., `Creature`, `MonsterAI`)
   - Functions/methods: camelCase
-  - Files: snake_case matching class names (e.g., `monster_ai.cpp` for `MonsterAI`)
+  - Files: snake_case converted from PascalCase class names (e.g., `monster_ai.cpp` for `MonsterAI`)
 
 ### Design Patterns
 - Heavy use of inheritance and polymorphism
