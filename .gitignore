@@ -27,6 +27,7 @@ parse_game
 *.adv
 *.cam
 *.war
+*.dll
 version.h
 data
 sound_wav
@@ -51,3 +52,6 @@ gen_version
 log.gz
 libsteam_api.so
 worldgen_out.txt
+KeeperRL.dmp
+Makefile
+Makefile

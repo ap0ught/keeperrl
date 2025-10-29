@@ -239,6 +239,7 @@ class Creature : public Renderable, public UniqueEntity<Creature>, public OwnedO
   vector<Position> getCurrentPath() const;
   bool canNavigateToOrNeighbor(Position) const;
   bool canNavigateTo(Position pos) const;
+  bool hasQuarters() const;
 
   bool atTarget() const;
 
@@ -333,7 +334,7 @@ class Creature : public Renderable, public UniqueEntity<Creature>, public OwnedO
 
   EnumSet<CreatureStatus>& getStatus();
   const EnumSet<CreatureStatus>& getStatus() const;
-  vector<Creature*> getCompanions() const;
+  vector<Creature*> getCompanions(bool withNoKillCreditOnly = false) const;
   Creature* getSteedCompanion() const;
   void removeCompanions(int index);
   void toggleCaptureOrder();
@@ -370,7 +371,6 @@ class Creature : public Renderable, public UniqueEntity<Creature>, public OwnedO
 
   unordered_set<string> SERIAL(effectFlags);
   vector<SpecialTrait> SERIAL(specialTraits);
-  Creature::Id SERIAL(getsKillCredits);
 
   TribeSet getFriendlyTribes() const;
 
@@ -428,8 +428,8 @@ class Creature : public Renderable, public UniqueEntity<Creature>, public OwnedO
   struct CompanionGroup {
     vector<WeakPointer<Creature>> SERIAL(creatures);
     optional<AttrType> SERIAL(statsBase);
-    bool SERIAL(notUsed);
-    SERIALIZE_ALL(creatures, statsBase, notUsed)
+    bool SERIAL(getsKillCredit);
+    SERIALIZE_ALL(creatures, statsBase, getsKillCredit)
   };
   vector<CompanionGroup> SERIAL(companions);
   void tickCompanions();
@@ -479,5 +479,5 @@ struct AdjectiveInfo {
 };
 
 #ifndef PARSE_GAME
-CEREAL_CLASS_VERSION(Creature, 2)
+CEREAL_CLASS_VERSION(Creature, 1)
 #endif

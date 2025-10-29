@@ -48,8 +48,6 @@ void CollectiveConfig::serialize(Archive& ar, const unsigned int version) {
   ar(SKIP(type), OPTION(leaderAsFighter), OPTION(spawnGhosts), OPTION(ghostProb), OPTION(guardianInfo));
   ar(SKIP(populationString), OPTION(prisoners), OPTION(alwaysMount), OPTION(discoverAchievement));
   ar(SKIP(requireQuartersForExp));
-  if (version >= 1)
-    ar(SKIP(prisonerPredicate));
 }
 
 SERIALIZABLE(CollectiveConfig);
@@ -109,13 +107,11 @@ CollectiveConfig::CollectiveConfig(TimeInterval interval, CollectiveType t, int 
 }
 
 CollectiveConfig CollectiveConfig::keeper(TimeInterval immigrantInterval, int maxPopulation,
-    TString populationString, bool prisoners, optional<CreaturePredicate> prisonerPredicate,
-    ConquerCondition conquerCondition, bool requireQuartersForExp) {
+    TString populationString, bool prisoners, ConquerCondition conquerCondition, bool requireQuartersForExp) {
   auto ret = CollectiveConfig(immigrantInterval, KEEPER, maxPopulation, conquerCondition);
   ret.populationString = populationString;
   ret.prisoners = prisoners;
   ret.requireQuartersForExp = requireQuartersForExp;
-  ret.prisonerPredicate = std::move(prisonerPredicate);
   return ret;
 }
 
@@ -225,10 +221,6 @@ bool CollectiveConfig::canCapturePrisoners() const {
   return prisoners;
 }
 
-bool CollectiveConfig::canCapturePrisoner(const Creature* c) const {
-  return !!prisoners && (!prisonerPredicate || prisonerPredicate->apply(c, nullptr));
-}
-
 bool CollectiveConfig::alwaysMountSteeds() const {
   return alwaysMount;
 }
@@ -336,7 +328,6 @@ const MinionActivityInfo& CollectiveConfig::getActivityInfo(MinionActivity task)
       case MinionActivity::BE_WHIPPED: return {FurnitureType("WHIPPING_POST")};
       case MinionActivity::BE_TORTURED: return {FurnitureType("TORTURE_TABLE")};
       case MinionActivity::BE_EXECUTED: return {FurnitureType("GALLOWS")};
-      case MinionActivity::WITCH_CAULDRON: return {MinionActivityInfo::BEING_COOKED};
       case MinionActivity::CRAFT:
         return {[](const ContentFactory* f, const Collective* col, const Creature* c, FurnitureType t) {
             PROFILE_BLOCK("Crafting predicate");

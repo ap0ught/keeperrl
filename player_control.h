@@ -151,7 +151,6 @@ class PlayerControl : public CreatureView, public CollectiveControl, public Even
   void considerWarning();
   void considerAllianceAttack();
   void considerNewAttacks();
-  void updateWitchCauldrons();
 
   TribeId getTribeId() const;
   bool canSee(const Creature*) const;
@@ -287,6 +286,7 @@ class PlayerControl : public CreatureView, public CollectiveControl, public Even
   bool takingScreenshot = false;
   void addBodyPart(Creature*);
   void handleBanishing(Creature*);
+  void handleQuartersAction(Creature*);
   optional<pair<ViewId,int>> getCostObj(CostInfo) const;
   optional<pair<ViewId,int>> getCostObj(const optional<CostInfo>&) const;
   ViewId getViewId(const BuildInfoTypes::BuildType&) const;

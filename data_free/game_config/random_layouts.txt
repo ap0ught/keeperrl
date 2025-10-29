@@ -600,47 +600,6 @@ End
     Inside(2, CellularAutomaton(Set("lava"), 0.75))
 }
 
-Def WitchHut() {
-  Building("wood_wall", "floor")
-  Corners(Set("no_door"), 1)
-  Place({1 1} Reset("wood_floor", "wood_door") 1 And(On("wood_wall"), Not On("no_door")))
-  Place (
-    ({1 1} Set("floor", "witch_cauldron") 1 FurnitureLoc()),
-    ({1 1} Set("bed") 1 FurnitureLoc()),
-    ({1 1} Set("torch") 1 FurnitureLoc()),
-    ({1 1} Set("adventurer_chest") 1 FurnitureLoc()),
-  )
-}
-End
-
-Def WitchPrison() {
-  Building("wood_wall", "wood_floor")
-  Corners(Set("no_door"), 1)
-  Place({1 1} Reset("wood_floor", "prison_door_unlocked") 1 And(On("wood_wall"), Not On("no_door")))
-  Filter(On("wood_floor"), Set("prison"))
-}
-End
-
-"witch_house" {
-  Place(
-    (size = {5 5} generator = {WitchHut() Set("building", "no_dig")} minSpacing = 1),
-    (size = {5 4} generator = {WitchPrison() Set("building", "no_dig")} minSpacing = 1),
-  )
-  Place(6,
-    ({1 1} Set("haunted_tree") 1 Not On("building")),
-    ({1 1} Set("haunted_tree2") 1 Not On("building")),
-    ({1 1} Set("haunted_tree3") 1 Not On("building")),
-    ({1 1} Set("haunted_tree4") 1 Not On("building")),
-    ({1 1} Set("haunted_tree5") 1 Not On("building")),
-    ({1 1} Set("haunted_tree6") 1 Not On("building")),
-    ({1 1} Set("haunted_tree7") 1 Not On("building")),
-    ({1 1} Set("haunted_tree8") 1 Not On("building"))
-    ({1 1} Set("haunted_effigy") 1 Not On("building")),
-    ({1 1} Set("haunted_effigy2") 1 Not On("building")),
-    ({1 1} Set("haunted_effigy3") 1 Not On("building")),
-  )
-}
-
 "special_tree" {
   Inside(1, Place({1 1} Set("special_tree")))
 }

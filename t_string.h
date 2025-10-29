@@ -40,7 +40,6 @@ class TString {
   public:
   explicit TString(string);
   explicit TString(int);
-  explicit TString(double);
   explicit TString(TimeInterval);
   explicit TString(GlobalTime);
   TString(TSentence);

@@ -114,8 +114,7 @@ void Game::spawnKeeper(AvatarInfo avatarInfo, vector<TString> introText) {
   auto& keeperInfo = avatarInfo.creatureInfo;
   auto builder = CollectiveBuilder(CollectiveConfig::keeper(
           TimeInterval(keeperInfo.immigrantInterval), keeperInfo.maxPopulation, keeperInfo.populationString,
-          keeperInfo.prisoners, keeperInfo.prisonerPredicate, ConquerCondition::KILL_LEADER,
-          keeperInfo.requireQuartersForExp),
+          keeperInfo.prisoners, ConquerCondition::KILL_LEADER, keeperInfo.requireQuartersForExp),
       keeperRef->getTribeId(), "keeper collective")
       .setModel(model)
       .addCreature(keeperRef, keeperInfo.minionTraits);
@@ -715,8 +714,7 @@ void Game::gameOver(const Creature* creature, int numKills, int points) {
   text.push_back(TSentence("YOU_KILLED_AND_SCORED", TString(numKills), TString(points)));
   if (dungeonTurns > 0) {
     text.push_back(TSentence("TURNS_DEFENDING_THE_BASE", TString(dungeonTurns)));
-    if (turns > dungeonTurns)
-      text.push_back(TSentence("TURNS_SPENT_ATTACKING", TString(turns - dungeonTurns)));
+    text.push_back(TSentence("TURNS_SPENT_ATTACKING", TString(turns - dungeonTurns)));
   }
   text.append(statistics->getText());
   view->presentTextBelow(TString(TStringId("GAME_OVER")), combineWithNewLine(text));

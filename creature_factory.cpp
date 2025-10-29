@@ -53,7 +53,6 @@
 #include "item_types.h"
 #include "content_factory.h"
 #include "automaton_part.h"
-#include "effect_type.h"
 
 SERIALIZE_DEF(CreatureFactory, nameGenerator, attributes, spellSchools, spells)
 SERIALIZATION_CONSTRUCTOR_IMPL(CreatureFactory)
@@ -142,19 +141,13 @@ PCreature CreatureFactory::getAnimatedItem(const ContentFactory* factory, PItem 
   auto attributes = CATTR(
             c.viewId = item->getViewObject().id();
             c.attr[AttrType("DEFENSE")] = item->getModifier(AttrType("DEFENSE")) + attrBonus;
-            bool found = false;
             for (auto& attr : factory->attrInfo)
-              if (attr.second.isAttackAttr && item->getModifier(attr.first) > 0) {
+              if (attr.second.isAttackAttr && item->getModifier(attr.first) > 0)
                 c.attr[attr.first] = item->getModifier(attr.first) + attrBonus;
-                found = true;
-              }
-            if (!found)
-              c.attr[AttrType("DAMAGE")] = attrBonus;
             c.body = Body::nonHumanoid(BodyMaterialId("SPIRIT"), Body::Size::SMALL);
             c.body->setDeathSound(none);
             c.name = TString(TSentence("ANIMATED_OBJECT", item->getName()));
             c.gender = Gender::IT;
-            c.canJoinCollective = false;
             auto weaponInfo = item->getWeaponInfo();
             weaponInfo.itselfMessage = true;
             c.body->addIntrinsicAttack(BodyPart::TORSO, IntrinsicAttack(ItemType(
@@ -165,32 +158,6 @@ PCreature CreatureFactory::getAnimatedItem(const ContentFactory* factory, PItem 
   auto ret = makeOwner<Creature>(viewObject , tribe, std::move(attributes), SpellMap{});
   ret->setController(Monster::getFactory(MonsterAIFactory::monster()).get(ret.get()));
   ret->take(std::move(item), factory);
-  initializeAttributes(none, ret->getAttributes());
-  return ret;
-}
-
-PCreature CreatureFactory::getAnimatedFurniture(const ContentFactory* factory, const Furniture* item, TribeId tribe, int attrBonus) {
-  auto attributes = CATTR(
-            c.viewId = item->getViewObject()->id();
-            c.attr[AttrType("DEFENSE")] = attrBonus;
-            bool found = false;
-            c.attr[AttrType("DAMAGE")] = attrBonus;
-            c.body = Body::nonHumanoid(BodyMaterialId("SPIRIT"), item->isWall() ? Body::Size::HUGE : Body::Size::LARGE);
-            c.body->setDeathSound(none);
-            c.name = TString(TSentence("ANIMATED_OBJECT", item->getName()));
-            c.gender = Gender::IT;
-            c.canJoinCollective = false;
-            WeaponInfo weaponInfo;
-            weaponInfo.itselfMessage = true;
-            c.body->addIntrinsicAttack(BodyPart::TORSO, IntrinsicAttack(ItemType(
-                ItemTypes::Intrinsic{item->getViewObject()->id(), item->getName(), 0, std::move(weaponInfo)})));
-            c.permanentEffects[LastingEffect::FLYING] = 1;
-            c.deathEffect = Effect(Effects::Filter(CreaturePredicates::Not{CreaturePredicates::AnyFurniture(FurnitureLayer::MIDDLE)},
-                Effect(EffectType::PlaceFurniture{item->getType()})));
-  );
-  auto viewObject = attributes.createViewObject();
-  auto ret = makeOwner<Creature>(viewObject , tribe, std::move(attributes), SpellMap{});
-  ret->setController(Monster::getFactory(MonsterAIFactory::monster()).get(ret.get()));
   initializeAttributes(none, ret->getAttributes());
   return ret;
 }
@@ -236,7 +203,6 @@ CreatureAttributes CreatureFactory::getKrakenAttributes(ViewId id, const TString
       c.body->setCanBeCaptured(false);
       c.attr[AttrType("DAMAGE")] = 28;
       c.attr[AttrType("DEFENSE")] = 28;
-      c.canJoinCollective = false;
       c.permanentEffects[LastingEffect::POISON_RESISTANT] = 1;
       c.permanentEffects[LastingEffect::NIGHT_VISION] = 1;
       c.permanentBuffs.push_back(BuffId("SWIMMING_SKILL"));
@@ -292,8 +258,6 @@ ViewIdList CreatureFactory::getViewId(CreatureId id) const {
     return {a->viewId};
   if (auto p = getReferenceMaybe(getSpecialParams(), id))
     return {getSpecialViewId(p->humanoid, p->large, p->living, p->wings)};
-  if (id == "KRAKEN")
-    return {ViewId("kraken_head")};
   return {ViewId("knight")};
 }
 
@@ -302,8 +266,6 @@ TString CreatureFactory::getName(CreatureId id) const {
     return a->name.bare();
   if (auto p = getReferenceMaybe(getSpecialParams(), id))
     return TString(getSpeciesName(p->humanoid, p->large, p->living, p->wings));
-  if (id == "KRAKEN")
-    return TStringId("KRAKEN");
   return TStringId("KNIGHT_NAME");
 }
 
@@ -487,7 +449,7 @@ class KrakenController : public Monster {
   WeakPointer<KrakenController> SERIAL(father);
 };
 
-namespace {
+
 class ShopkeeperController : public Monster, public EventListener<ShopkeeperController> {
   public:
   ShopkeeperController(Creature* c, vector<Vec2> area)
@@ -619,7 +581,7 @@ class ShopkeeperController : public Monster, public EventListener<ShopkeeperCont
   Level* SERIAL(myLevel) = nullptr;
   bool SERIAL(firstMove) = true;
 };
-}
+
 
 void CreatureFactory::addInventory(Creature* c, const vector<ItemType>& items) {
   for (ItemType item : items)

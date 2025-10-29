@@ -143,8 +143,6 @@ PPlayerControl PlayerControl::create(Collective* col, vector<TString> introText,
   auto ret = makeOwner<PlayerControl>(Private{}, col, alignment);
   ret->subscribeTo(col->getModel());
   ret->introText = introText;
-  for (auto v : col->getKnownTiles().getAll())
-    ret->addToMemory(v);
   return ret;
 }
 
@@ -580,7 +578,7 @@ static ItemInfo getEmptySlotItem(EquipmentSlot slot, bool locked) {
 }
 
 static CollectiveInfo::PromotionOption getPromotionOption(const ContentFactory* factory, const PromotionInfo& info) {
-  return {info.viewId, info.name, info.applied.getDescription(factory), info.descriptionUI};
+  return {info.viewId, info.name, info.applied.getDescription(factory)};
 }
 
 void PlayerControl::fillPromotions(Creature* creature, CollectiveInfo& info) const {
@@ -1235,7 +1233,9 @@ vector<PlayerInfo> PlayerControl::getPlayerInfos(vector<Creature*> creatures) co
       fillEquipment(c, minionInfo);
       if (canControlSingle(c) && !c->getRider())
         minionInfo.actions.push_back(PlayerInfo::Action::CONTROL);
-      if (!collective->hasTrait(c, MinionTrait::PRISONER)) {
+
+      bool isPrisoner = collective->hasTrait(c, MinionTrait::PRISONER);
+      if (!isPrisoner) {
         minionInfo.actions.push_back(PlayerInfo::Action::RENAME);
       } else
         minionInfo.experienceInfo.training.clear();
@@ -1252,6 +1252,9 @@ vector<PlayerInfo> PlayerControl::getPlayerInfos(vector<Creature*> creatures) co
       minionInfo.actions.push_back(PlayerInfo::Action::LOCATE);
       if (collective->usesEquipment(c))
         minionInfo.actions.push_back(PlayerInfo::Action::ASSIGN_EQUIPMENT);
+      if (!isPrisoner && collective->minionCanUseQuarters(c)) {
+        minionInfo.actions.push_back(PlayerInfo::Action::QUARTERS);
+      }
     }
   }
   return minions;
@@ -1296,8 +1299,7 @@ void PlayerControl::fillMinions(CollectiveInfo& info) const {
     if (c->isAffected(LastingEffect::STEED) && !minions.contains(c))
       minions.push_back(c);
   info.minionGroups = getCreatureGroups(minions);
-  if (collective->getConfig().getMaxPopulation() > 1)
-    info.automatonGroups = getAutomatonGroups(minions);
+  info.automatonGroups = getAutomatonGroups(minions);
   info.minions = minions.transform([](const Creature* c) { return CreatureInfo(c) ;});
   info.minionCount = collective->getPopulationSize();
   info.minionLimit = collective->getMaxPopulation();
@@ -2331,7 +2333,7 @@ void PlayerControl::getSquareViewIndex(Position pos, bool canSee, ViewIndex& ind
       auto& object = index.getObject(ViewLayer::CREATURE);
       if (isEnemy(c)) {
         object.setModifier(ViewObject::Modifier::HOSTILE);
-        if (c->canBeCaptured() && collective->getConfig().canCapturePrisoner(c))
+        if (c->canBeCaptured() && collective->getConfig().canCapturePrisoners())
           object.setClickAction(c->isCaptureOrdered() ?
               ViewObjectAction::CANCEL_CAPTURE_ORDER : ViewObjectAction::ORDER_CAPTURE);
       } else
@@ -2868,6 +2870,39 @@ void PlayerControl::processInput(View* view, UserInput input) {
       }
       break;
     }
+    case UserInputId::WORKSHOP_INCREASE_PRIORITY: {
+      auto& info = input.get<WorkshopPriorityInfo>();
+      if (chosenWorkshop && info.adjacentItemIndex < info.itemIndex) {
+        bool maxChange = info.maxChangeFunc();
+        int firstIndex = maxChange ? 0 : info.adjacentItemIndex;
+        if (*chosenWorkshop == WorkshopType("FURNACE")) {
+          auto& furnace = collective->getFurnace();
+          furnace.changePriority(firstIndex, info.itemIndex, info.itemIndex + info.itemCount);
+        }
+        else {
+          auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
+          workshop.changePriority(collective, firstIndex, info.itemIndex, info.itemIndex + info.itemCount); 
+        }
+      }
+      break;
+    }
+    case UserInputId::WORKSHOP_DECREASE_PRIORITY: {
+      auto& info = input.get<WorkshopPriorityInfo>();
+      if (chosenWorkshop && info.adjacentItemIndex > info.itemIndex) {
+        bool maxChange = info.maxChangeFunc();
+        if (*chosenWorkshop == WorkshopType("FURNACE")) {
+          auto& furnace = collective->getFurnace();
+          int lastIndex = maxChange ? furnace.getQueued().size() : info.adjacentItemIndex + info.adjacentItemCount;
+          furnace.changePriority(info.itemIndex, info.adjacentItemIndex, lastIndex);
+        }
+        else {  
+          auto& workshop = collective->getWorkshops().types.at(*chosenWorkshop);
+          int lastIndex = maxChange ? workshop.getQueued().size() : info.adjacentItemIndex + info.adjacentItemCount;
+          workshop.changePriority(collective, info.itemIndex, info.adjacentItemIndex, lastIndex);     // ..., first, middle, last)
+        }
+      }
+      break;
+    }
     case UserInputId::LIBRARY_ADD:
       acquireTech(input.get<TechId>());
       break;
@@ -2893,7 +2928,7 @@ void PlayerControl::processInput(View* view, UserInput input) {
           else
             setChosenTeam(*chosenTeam, c->getUniqueId());
         } else
-        if (collective->getConfig().canCapturePrisoner(c) && collective->getTribe()->isEnemy(c))
+        if (collective->getConfig().canCapturePrisoners() && collective->getTribe()->isEnemy(c))
           c->toggleCaptureOrder();
       }
       break;
@@ -2972,6 +3007,10 @@ void PlayerControl::processInput(View* view, UserInput input) {
             else
               c->addPermanentEffect(LastingEffect::LOCKED_POSITION);
             break;
+          case PlayerInfo::Action::QUARTERS: {
+            handleQuartersAction(c);
+            break;
+          }
         }
       break;
     }
@@ -3148,6 +3187,65 @@ void PlayerControl::processInput(View* view, UserInput input) {
     default:
       break;
   }
+}
+
+void PlayerControl::handleQuartersAction(Creature* c) {
+  using QI = Zones::QuartersInfo;
+  const auto& finalList = collective->getZones().getAllQuarters(c->getUniqueId());
+  if (finalList.empty()) return;
+
+  ScriptedUIDataElems::Record data;
+  double currentLuxury = collective->getZones().getQuarters(c->getUniqueId()).empty() == false
+    ? finalList[0].luxury // selected creature's quarters will be on top (if it has one)
+    : 0.0; // otherwise 0
+  double reqLuxury = getRequiredLuxury(c->getCombatExperience(false, false));
+  if (reqLuxury > currentLuxury)
+    data.elems["currInsuffLux"] = TString("placeholder"_s);
+  data.elems["title"] = TString(TStringId("QUARTERS_TITLE"));
+  data.elems["currentLuxText"] = TString(TStringId("QUARTERS_CURRENT_LUXURY_LABEL"));
+  data.elems["currentLuxury"] = TString(TSentence("QUARTERS_CURRENT_LUXURY", TString(toString(currentLuxury)), TString(getRequiredLuxury(c->getCombatExperience(false, false)))));
+  data.elems["quarters_header"] = TString(TStringId("QUARTERS_DETAILS_LABEL"));
+  data.elems["owner_header"] = TString(TStringId("QUARTERS_OWNER_LABEL"));
+  
+  ScriptedUIDataElems::List list;
+  int idx = 0;
+  int locateIdx = -1, assignIdx = -1;
+  for (const QI& q : finalList) {              
+    ScriptedUIDataElems::Record r;
+    if (reqLuxury > q.luxury)
+      r.elems["insuffLuxury"] = TString(""_s);
+    r.elems["luxury"] = combineWithNoSpace(TStringId("QUARTERS_LUXURY_LABEL"), TString(toString(q.luxury)));
+    const auto& level = q.positions.begin()->getLevel();
+    r.elems["level"] = combineWithNoSpace(TStringId("QUARTERS_LEVEL_LABEL"), TString(level->depth));
+    TString ownerLabel = TString(TStringId("QUARTERS_MENU_UNASSIGNED_LABEL"));
+    if (q.id) {
+      const auto& quartersOwner = getCreature(*q.id);
+      if (q.id == c->getUniqueId()) {
+        r.elems["thisOwner"] = TString("placeholder"_s);
+        r.elems["current"] = TString(TStringId("QUARTERS_CURRENT_LABEL"));
+        ownerLabel = getCreature(*q.id)->getName().aOrTitle();
+      }
+      else {
+        ownerLabel = quartersOwner->getName().aOrTitle();
+      }
+      r.elems["view_id"] = quartersOwner->getViewObject().getViewIdList();
+    }
+    r.elems["owner"] = ownerLabel;
+    function<bool()> callbackAssign = [&assignIdx, idx = idx] { assignIdx = idx; return true; };
+    function<bool()> callbackLocate = [&locateIdx, idx = idx] { locateIdx = idx; return true; };
+    r.elems["callback"] = ScriptedUIDataElems::Callback { callbackAssign, callbackLocate };
+    list.push_back(std::move(r));
+    ++idx;
+  }
+  data.elems["elems"] = std::move(list);
+  
+  ScriptedUIState state;
+  getView()->scriptedUI("quarters_menu", data, state);
+
+  if (assignIdx > -1)
+    collective->assignQuarters(c, *finalList[assignIdx].positions.begin());
+  else if (locateIdx > -1)
+    setScrollPos(*finalList[locateIdx].positions.begin());
 }
 
 void PlayerControl::scrollStairs(int dir) {
@@ -3462,7 +3560,7 @@ void PlayerControl::onSquareClick(Position pos) {
 }
 
 optional<PlayerControl::QuartersInfo> PlayerControl::getQuarters(Vec2 pos) const {
-  optional<QuartersInfo> ret;
+  optional<QuartersInfo> quartersInfo;
   auto level = getCurrentLevel();
   auto& zones = collective->getZones();
   if (auto info = zones.getQuartersInfo(Position(pos, level))) {
@@ -3480,14 +3578,14 @@ optional<PlayerControl::QuartersInfo> PlayerControl::getQuarters(Vec2 pos) const
         viewId = c->getViewObject().getViewIdList();
         name = c->getName().aOrTitle();
       }
-    ret = QuartersInfo {
+    quartersInfo = QuartersInfo {
       v,
       viewId,
       name,
       luxury
     };
   }
-  return ret;
+  return quartersInfo;
 }
 
 double PlayerControl::getAnimationTime() const {
@@ -3690,7 +3788,7 @@ void PlayerControl::considerTogglingCaptureOrderOnMinions() const {
       toCapture.push_back(c);*/
   for (auto c : toCapture)
     for (auto col : c->getPosition().getModel()->getCollectives())
-      if (col != collective && col->getConfig().canCapturePrisoner(c) && !col->isConquered())
+      if (col != collective && col->getConfig().canCapturePrisoners() && !col->isConquered())
         for (auto pos : col->getTerritory().getPillagePositions())
           if (pos.getCreature() == c)
             c->setCaptureOrder(true);
@@ -3828,24 +3926,6 @@ void PlayerControl::considerSoloAchievement() {
   }
 }
 
-void PlayerControl::updateWitchCauldrons() {
-  if (!getGame()->getContentFactory()->resourceInfo.count(CollectiveResourceId("COOKED_CHILDREN")))
-    return;
-  bool cauldronFull = collective->numResource(CollectiveResourceId("COOKED_CHILDREN")) > 0;
-  if (collective->getWorkshops().types.count(WorkshopType("WITCH_LABORATORY")))
-    for (auto& elem : collective->getWorkshops().types.at(WorkshopType("WITCH_LABORATORY")).getQueued())
-      if (elem.paid) {
-        cauldronFull = true;
-        break;
-      }
-  ViewId viewId(cauldronFull ? "cauldron" : "cauldron_empty");
-  for (auto pos : collective->getConstructions().getBuiltPositions(FurnitureType("WITCH_LABORATORY"))) {
-    pos.modFurniture(FurnitureLayer::MIDDLE)->getViewObject()->setId(viewId);
-    pos.setNeedsRenderAndMemoryUpdate(true);
-    updateSquareMemory(pos);
-  }
-}
-
 void PlayerControl::tick() {
   prisonSizeCache.clear();
   collective->getConstructions().checkDebtConsistency();
@@ -3878,7 +3958,6 @@ void PlayerControl::tick() {
       hints[numHint] = TString();
     }
   }
-  updateWitchCauldrons();
 }
 
 bool PlayerControl::canSee(const Creature* c) const {

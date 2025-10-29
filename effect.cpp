@@ -427,16 +427,7 @@ TStringId Effects::IncreaseAttr::get(TStringId ifIncrease, TStringId ifDecrease)
 static bool applyToCreature(const Effects::AddExperience& e, Creature* c, Creature* attacker) {
   c->setCombatExperience(c->getCombatExperience(false, false) + e.amount);
   c->you(MsgType::ARE, TStringId("MORE_EXPERIENCED"));
-  c->addPersonalEvent(TSentence("CREATURE_ATTRIBUTES_HORSE_THIRDPERSON", c->getName().a()));
   return true;
-}
-
-static EffectAIIntent shouldAIApplyToCreature(const Effects::AddExperience& e, const Creature* victim, bool isEnemy) {
-  return !isEnemy;
-}
-
-static optional<MinionEquipmentType> getMinionEquipmentType(const Effects::AddExperience&) {
-  return MinionEquipmentType::COMBAT_ITEM;
 }
 
 static TString getName(const Effects::AddExperience& e, const ContentFactory*) {
@@ -649,24 +640,10 @@ static bool applyToCreature(const Effects::Banish& a, Creature *c, Creature* att
   return false;
 }
 
-template <class Archive>
-void Effects::Summon::serialize(Archive& ar, const unsigned int version) {
-  ar(creature, count, ttl);
-  if (version == 1)
-    ar(getsKillCredit);
-}
-
 static bool apply(const Effects::Summon& e, Position pos, Creature* attacker) {
-  if (auto c = pos.getCreature()) {
-    auto res = Effect::summon(c, e.creature, Random.get(e.count), e.ttl.map([](int v) { return TimeInterval(v); }), 1_visible);
-    if (!e.getsKillCredit)
-      for (auto summoned : res) {
-        summoned->getsKillCredits = c->getUniqueId();
-        summoned->setCombatExperience(attacker->getCombatExperience(true, false));
-        summoned->getAttributes().setAIType(AIType::MELEE);
-      }
-    return !res.empty();
-  } else {
+  if (auto c = pos.getCreature())
+    return !Effect::summon(c, e.creature, Random.get(e.count), e.ttl.map([](int v) { return TimeInterval(v); }), 1_visible).empty();
+  else {
     auto tribe = [&] {
       if (attacker)
         return attacker->getTribeId();
@@ -1618,8 +1595,6 @@ static TString getName(const Effects::Chain& e, const ContentFactory* f) {
 }
 
 static TString getDescription(const Effects::Chain& e, const ContentFactory* f) {
-  if (!e.effects.empty())
-    return e.effects[0].getDescription(f);
   return TString();
 }
 
@@ -2100,7 +2075,7 @@ static bool apply(const Effects::DirectedBlast& b, Position pos, Creature*) {
   return true;
 }
 
-static bool pullCreature(Creature* attacker, Creature* victim, const vector<Position>& trajectory) {
+static bool pullCreature(Creature* victim, const vector<Position>& trajectory) {
   auto victimPos = victim->getPosition();
   optional<Position> target;
   for (auto& v : trajectory) {
@@ -2113,8 +2088,7 @@ static bool pullCreature(Creature* attacker, Creature* victim, const vector<Posi
       target = none;
   }
   if (target) {
-    attacker->verb(TStringId("YOU_PULL_WITH_YOUR_HAIR"), TStringId("PULLS_WITH_HER_HAIR"), victim->getName().the());
-    victim->addEffect(LastingEffect::IMMOBILE, 2_visible);
+    victim->addEffect(LastingEffect::COLLAPSED, 2_visible);
     victim->displace(victim->getPosition().getDir(*target));
     return true;
   }
@@ -2136,10 +2110,9 @@ static TString getDescription(const Effects::Pull&, const ContentFactory*) {
 static bool apply(const Effects::Pull&, Position pos, Creature* attacker) {
   CHECK(attacker);
   vector<Position> trajectory = drawLine(attacker->getPosition(), pos);
-  for (auto& v : trajectory)
-    if (v != attacker->getPosition())
-      if (auto c = v.getCreature())
-        return pullCreature(attacker, c, trajectory);
+  for (auto& pos : trajectory)
+    if (auto c = pos.getCreature())
+      return pullCreature(c, trajectory);
   return false;
 }
 
@@ -2224,10 +2197,6 @@ static TString getName(const Effects::AnimateItems& m, const ContentFactory*) {
       return TStringId("ANIMATE_CORPSES_EFFECT_NAME");
     case Effects::AnimatedItemType::WEAPON:
       return TStringId("ANIMATE_WEAPONS_EFFECT_NAME");
-    case Effects::AnimatedItemType::SMALL_ITEMS:
-      return TStringId("ANIMATE_SMALL_ITEMS_EFFECT_NAME");
-    case Effects::AnimatedItemType::MEDIUM_ITEMS:
-      return TStringId("ANIMATE_MEDIUM_ITEMS_EFFECT_NAME");
   }
 }
 
@@ -2241,10 +2210,6 @@ static TString getDescription(const Effects::AnimateItems& e, const ContentFacto
       return TSentence("ANIMATE_CORPSES_EFFECT_DESCRIPTION", TString(e.maxCount));
     case Effects::AnimatedItemType::WEAPON:
       return TSentence("ANIMATE_WEAPONS_EFFECT_DESCRIPTION", TString(e.maxCount));
-    case Effects::AnimatedItemType::SMALL_ITEMS:
-      return TSentence("ANIMATE_SMALL_ITEMS_EFFECT_DESCRIPTION", TString(e.maxCount));
-    case Effects::AnimatedItemType::MEDIUM_ITEMS:
-      return TSentence("ANIMATE_MEDIUM_ITEMS_EFFECT_DESCRIPTION", TString(e.maxCount));
   }
 }
 
@@ -2254,21 +2219,6 @@ static vector<Item*> getItemsToAnimate(const Effects::AnimateItems& m, Position 
       return pos.getItems().filter([](auto it) { return it->getClass() == ItemClass::CORPSE; });
     case Effects::AnimatedItemType::WEAPON:
       return pos.getItems(ItemIndex::WEAPON);
-    case Effects::AnimatedItemType::SMALL_ITEMS:
-      return pos.getItems().filter([](auto it) { return it->getWeight() <= 20; });
-    case Effects::AnimatedItemType::MEDIUM_ITEMS:
-      return pos.getItems().filter([](auto it) { return it->getWeight() > 20; });
-  }
-}
-
-static double getStatMultiplier(const Effects::AnimateItems& e) {
-  switch (e.type) {
-    case Effects::AnimatedItemType::CORPSE:
-    case Effects::AnimatedItemType::WEAPON:
-    case Effects::AnimatedItemType::MEDIUM_ITEMS:
-      return 1.0;
-    case Effects::AnimatedItemType::SMALL_ITEMS:
-      return 0.6;
   }
 }
 
@@ -2283,7 +2233,7 @@ static bool apply(const Effects::AnimateItems& m, Position pos, Creature* attack
     auto v = candidates[i].first;
     auto creature = pos.getGame()->getContentFactory()->getCreatures().
         getAnimatedItem(pos.getGame()->getContentFactory(), v.removeItem(candidates[i].second), attacker->getTribeId(),
-            getStatMultiplier(m) * attacker->getAttr(AttrType("SPELL_DAMAGE")));
+            attacker->getAttr(AttrType("SPELL_DAMAGE")));
     for (auto c : Effect::summonCreatures(v, makeVec(std::move(creature)))) {
       c->addEffect(LastingEffect::SUMMONED, TimeInterval{Random.get(m.time)}, false);
       c->effectFlags.insert("animated");
@@ -2303,53 +2253,6 @@ static EffectAIIntent shouldAIApply(const Effects::AnimateItems& m, const Creatu
     }
   }
   return 0;
-}
-
-static TString getName(const Effects::AnimateFurniture& m, const ContentFactory*) {
-  return m.walls
-     ? TStringId("ANIMATE_WALLS_EFFECT_NAME")
-     : TStringId("ANIMATE_FURNITURE_EFFECT_NAME");
-}
-
-static bool isOffensive(const Effects::AnimateFurniture&) {
-  return true;
-}
-
-static TString getDescription(const Effects::AnimateFurniture& e, const ContentFactory*) {
-  return e.walls
-     ? TStringId("ANIMATE_WALLS_EFFECT_DESCRIPTION")
-     : TStringId("ANIMATE_FURNITURE_EFFECT_DESCRIPTION");
-}
-
-static double getStatMultiplier(const Effects::AnimateFurniture& e) {
-  return e.walls ? 1.0 : 0.67;
-}
-
-static bool apply(const Effects::AnimateFurniture& m, Position pos, Creature* attacker) {
-  vector<pair<Position, PCreature>> candidates;
-  for (auto v : Random.permutation(pos.getRectangle(Rectangle::centered(m.radius))))
-    if (auto f = v.getFurniture(FurnitureLayer::MIDDLE))
-      if (f->isWall() == m.walls && f->canAnimate()) {
-        auto creature = pos.getGame()->getContentFactory()->getCreatures().
-                getAnimatedFurniture(pos.getGame()->getContentFactory(), v.getFurniture(FurnitureLayer::MIDDLE), attacker->getTribeId(),
-                    getStatMultiplier(m) * attacker->getAttr(AttrType("SPELL_DAMAGE")));
-        candidates.push_back(make_pair(v, std::move(creature)));
-      }
-  bool res = false;
-  for (int i : Range(min(m.maxCount, candidates.size()))) {
-    auto v = candidates[i].first;
-    v.removeFurniture(FurnitureLayer::MIDDLE);
-    for (auto c : Effect::summonCreatures(v, makeVec(std::move(candidates[i].second)))) {
-      c->addEffect(LastingEffect::SUMMONED, TimeInterval{Random.get(m.time)}, false);
-      c->effectFlags.insert("animated");
-      res = true;
-    }
-  }
-  return res;
-}
-
-static EffectAIIntent shouldAIApply(const Effects::AnimateFurniture& m, const Creature* caster, Position pos) {
-  return -1;
 }
 
 static TString getName(const Effects::Audience&, const ContentFactory*) {
@@ -2979,15 +2882,6 @@ void Effects::Lasting::serialize(PrettyInputArchive& ar1, const unsigned int) {
   if (lastingEffect.contains<BuffId>() && !duration)
     ar1.error("Buff duration is required");
 }
-
-template <>
-void Effects::Summon::serialize(PrettyInputArchive& ar, const unsigned int version) {
-  ar(creature);
-  if (ar.eatMaybe("noKillCredit"))
-    getsKillCredit = false;
-  ar(count, ttl);
-}
-
 
 namespace Effects {
 #define DEFAULT_ELEM "Chain"

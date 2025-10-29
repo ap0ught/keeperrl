@@ -162,7 +162,6 @@ class Furniture {
   bool isRequiresLight() const;
   bool isHostileSpell() const;
   bool isEyeball() const;
-  bool canAnimate() const;
   optional<BedType> getBedType() const;
   const optional<FurnitureEffectInfo>& getLastingEffectInfo() const;
   const heap_optional<ItemList>& getItemDrop() const;

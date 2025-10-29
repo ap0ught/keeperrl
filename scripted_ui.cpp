@@ -116,6 +116,19 @@ void performAction(const ScriptedUIData& data, ScriptedContext& context, EventCa
   }
 }
 
+void performActionDual(const ScriptedUIData& data, ScriptedContext& context, EventCallback& callback, MouseButtonId id) {
+  if (auto c = data.getReferenceMaybe<ScriptedUIDataElems::Callback>()) {
+    if (id == MouseButtonId::LEFT)
+      callback = c->fun;
+    else if (c->altFun && id == MouseButtonId::RIGHT)
+      callback = *c->altFun;
+  }
+  else {
+    USER_FATAL << "Expected callback";
+    fail();
+  }
+}
+
 struct Button : ScriptedUIInterface {
   void onClick(const ScriptedUIData& data, ScriptedContext& context, MouseButtonId id,
       Rectangle bounds, Vec2 pos, EventCallback& callback) const override {
@@ -133,6 +146,24 @@ struct Button : ScriptedUIInterface {
 };
 
 REGISTER_SCRIPTED_UI(Button);
+
+struct ButtonDual : ScriptedUIInterface {
+  void onClick(const ScriptedUIData& data, ScriptedContext& context, MouseButtonId id,
+      Rectangle bounds, Vec2 pos, EventCallback& callback) const override {
+    if (pos.inRectangle(bounds) == !reverse) {
+      performActionDual(data, context, callback, id);
+      if (soundId)
+        context.factory->soundLibrary->playSound(*soundId);
+    }
+  }
+
+  bool SERIAL(reverse);
+  MouseButtonId SERIAL(buttonId) = MouseButtonId::LEFT;
+  optional<SoundId> SERIAL(soundId);
+  SERIALIZE_ALL(roundBracket(), OPTION(reverse), OPTION(buttonId), OPTION(soundId))
+};
+
+REGISTER_SCRIPTED_UI(ButtonDual);
 
 struct KeyReader {
   SDL::SDL_Keycode key;
@@ -315,33 +346,20 @@ struct Paragraph : ScriptedUIInterface {
   }
 
   void render(const ScriptedUIData& data, ScriptedContext& context, Rectangle area) const override {
-    for (auto line : Iter(context.factory->breakText(getText(data, context), width, size))) {
-      if (centerLines) {
-        int width = context.renderer->getTextLength(*line, size, font);
-        context.renderer->drawText(font, size, color, area.topLeft() + Vec2((area.width() - width) / 2, line.index() * getLineHeight()), *line);
-      } else
-        context.renderer->drawText(font, size, color, area.topLeft() + Vec2(0, line.index() * getLineHeight()), *line);
-    }
-  }
-
-  int getLineHeight() const {
-    return size + 5;
+    for (auto line : Iter(context.factory->breakText(getText(data, context), width, size)))
+      context.renderer->drawText(font, size, color, area.topLeft() + Vec2(0, line.index() * size), *line);
   }
 
   Vec2 getSize(const ScriptedUIData& data, ScriptedContext& context) const override {
     auto text = getText(data, context);
-    if (auto elem = getValueMaybe(context.state.paragraphSizeCache, text))
-      return *elem;
-    auto lines = context.factory->breakText(text, width, size);
-    auto maxWidth = [&] {
-      int ret = 0;
-      for (auto& line : lines)
-        ret = max(ret, context.renderer->getTextLength(line, size, font));
+    auto getSize = [&] {
+      if (auto elem = getValueMaybe(context.state.paragraphSizeCache, text))
+        return *elem;
+      auto ret = context.factory->breakText(text, width, size).size();
+      context.state.paragraphSizeCache[text] = ret;
       return ret;
-    }();
-    auto ret = Vec2(maxWidth, getLineHeight() * lines.size());
-    context.state.paragraphSizeCache[text] = ret;
-    return ret;
+    };
+    return Vec2(width, size * getSize());
   }
 
   optional<TString> SERIAL(text);
@@ -349,8 +367,7 @@ struct Paragraph : ScriptedUIInterface {
   int SERIAL(size) = Renderer::textSize();
   Color SERIAL(color) = Color::WHITE;
   FontId SERIAL(font) = FontId::TEXT_FONT;
-  bool SERIAL(centerLines) = false;
-  SERIALIZE_ALL(roundBracket(), NAMED(width), OPTION(text), OPTION(size), OPTION(color), OPTION(font), OPTION(centerLines))
+  SERIALIZE_ALL(roundBracket(), NAMED(width), OPTION(text), OPTION(size), OPTION(color), OPTION(font))
 };
 
 REGISTER_SCRIPTED_UI(Paragraph);

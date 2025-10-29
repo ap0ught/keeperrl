@@ -114,8 +114,6 @@ optional<MinionActivity> MinionActivities::getActivityFor(const Collective* col,
     if (info.furniturePredicate(col->getGame()->getContentFactory(), col, c, type))
       return *task;
   }
-  if (c->getStatus().contains(CreatureStatus::PRISONER) && type == FurnitureType("WITCH_LABORATORY"))
-    return MinionActivity::WITCH_CAULDRON;
   return none;
 }
 
@@ -352,15 +350,6 @@ PTask MinionActivities::generate(Collective* collective, Creature* c, MinionActi
             Task::wait(10_visible),
             Task::activitySuccess()
         );
-      break;
-    }
-    case MinionActivityInfo::BEING_COOKED: {
-      PROFILE_BLOCK("Cooked");
-      const PositionSet& targets = collective->getConstructions().getBuiltPositions(FurnitureType("WITCH_LABORATORY"));
-      if (!targets.empty())
-        return
-            Task::applySquare(collective, targets.transform([](auto pos){ return make_pair(pos, FurnitureLayer::MIDDLE); }),
-                Task::SearchType::CONFESSION, Task::APPLY);
       break;
     }
     case MinionActivityInfo::EAT: {

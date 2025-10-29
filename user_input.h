@@ -81,6 +81,8 @@ enum class UserInputId {
   WORKSHOP_CHANGE_COUNT,
   WORKSHOP_UPGRADE,
   WORKSHOP_TAB,
+  WORKSHOP_INCREASE_PRIORITY,
+  WORKSHOP_DECREASE_PRIORITY,
   LIBRARY_ADD,
   VILLAGE_ACTION,
   DISMISS_VILLAGE_INFO,
@@ -190,6 +192,14 @@ struct WorkshopCountInfo {
   int newCount;
 };
 
+struct WorkshopPriorityInfo {
+  int itemIndex;
+  int itemCount;
+  int adjacentItemIndex;
+  int adjacentItemCount;
+  function<bool()> maxChangeFunc;
+};
+
 struct PromotionActionInfo {
   UniqueEntity<Creature>::Id minionId;
   int promotionIndex;
@@ -209,7 +219,7 @@ class UserInput : public EnumVariant<UserInputId, TYPES(BuildingClickInfo, int, 
     UniqueEntity<PlayerMessage>::Id, InventoryItemInfo, Vec2, TeamCreatureInfo, TeamGroupInfo, VillageActionInfo,
     TaskActionInfo, EquipmentActionInfo, CreatureDropInfo, CreatureGroupDropInfo, TeamDropInfo,
     TString, string, TechId, TeamMemberActionInfo, TeamOrder, DismissVillageInfo, WorkshopUpgradeInfo,
-    WorkshopCountInfo, AIActionInfo, PromotionActionInfo, EquipmentGroupAction, MinionActionInfo),
+    WorkshopCountInfo, WorkshopPriorityInfo, AIActionInfo, PromotionActionInfo, EquipmentGroupAction, MinionActionInfo),
         ASSIGN(BuildingClickInfo,
             UserInputId::RECT_SELECTION,
             UserInputId::RECT_CONFIRM),
@@ -299,6 +309,12 @@ class UserInput : public EnumVariant<UserInputId, TYPES(BuildingClickInfo, int, 
         ),
         ASSIGN(WorkshopCountInfo,
             UserInputId::WORKSHOP_CHANGE_COUNT
+        ),
+        ASSIGN(WorkshopPriorityInfo,
+            UserInputId::WORKSHOP_INCREASE_PRIORITY
+        ),
+        ASSIGN(WorkshopPriorityInfo,
+            UserInputId::WORKSHOP_DECREASE_PRIORITY
         ),
         ASSIGN(EquipmentGroupAction,
             UserInputId::EQUIPMENT_GROUP_ACTION

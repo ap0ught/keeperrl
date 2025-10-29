@@ -275,27 +275,6 @@
   immigrantGroups = { "white_stables_no_pop" }
 }
 
-"931_witch_adventurer"
-{
-  baseName = KEEPER_CREATURES_BASENAME10
-  creatureId = { "WITCH_PLAYER" }
-  tribeAlignment = EVIL
-  description = KEEPER_CREATURES_DESCRIPTION11
-  villainGroups = { EVIL_KEEPER EVIL_COTTAGES }
-  immigrantGroups = {}
-  technology = {}
-  zLevelGroups = { "basic" }
-  initialTech = { }
-  buildingGroups = {}
-  workshopGroups = {"witch_lab"}
-  minionTraits = {LEADER WORKER}
-  maxPopulation = 1
-  startingBase = {12 12} "witch_house"
-  requireQuartersForExp = false
-  enemyAggression = false
-  prisonerPredicate = HatedBy HATE_CHILDREN
-}
-
 "94_adoxie_adventurer"
 {
   baseName = KEEPER_CREATURES_BASENAME9

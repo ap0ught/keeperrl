@@ -605,6 +605,10 @@ bool Collective::minionCanUseQuarters(Creature* c) {
   return hasTrait(c, MinionTrait::FIGHTER) || hasTrait(c, MinionTrait::LEADER);
 }
 
+bool Collective::minionHasQuarters(UniqueEntity<Creature>::Id id) {
+  return !getZones().getQuarters(id).empty();
+}
+
 void Collective::updateMinionPromotions() {
   if (!config->minionsRequireQuarters())
     return;
@@ -1532,11 +1536,6 @@ void Collective::onAppliedSquare(Creature* c, pair<Position, FurnitureLayer> pos
       taskMap->addTask(Task::kill(c), pos.first, MinionActivity::WORKING);
     if (furniture->getType() == FurnitureType("TORTURE_TABLE"))
       taskMap->addTask(Task::torture(c), pos.first, MinionActivity::WORKING);
-    if (furniture->getType() == FurnitureType("WITCH_LABORATORY") && c->getStatus().contains(CreatureStatus::PRISONER)) {
-      control->addMessage(TStringId("A_CHILD_IS_COOKED"));
-      c->dieNoReason(Creature::DropType::ONLY_INVENTORY);
-      returnResource(CostInfo(CollectiveResourceId("COOKED_CHILDREN"), 1));
-    }
     if (furniture->getType() == FurnitureType("POETRY_TABLE") && Random.chance(0.01 * efficiency)) {
       auto poem = ItemType(ItemTypes::Poem{}).get(contentFactory);
       bool demon = Random.roll(500);
@@ -1822,6 +1821,19 @@ void Collective::setZone(Position pos, ZoneId id) {
 }
 
 void Collective::eraseZone(Position pos, ZoneId id) {
+  if (id == ZoneId::QUARTERS) {
+    auto quarters = zones->getQuartersInfo(pos);
+    if (quarters->id) {
+      auto matches = creatures.filter([&](Creature* c){
+        return c && c->getUniqueId() == quarters->id;
+      });
+
+      if (!matches.empty()) {
+        Creature* found = matches.front();
+        found->getAttributes().setHasQuarters(false);
+      }
+    }
+  }
   zones->eraseZone(pos, id);
   if (auto storageId = getZoneStorage(id)) {
     constructions->getStoragePositions(*storageId).remove(pos);
@@ -1830,7 +1842,21 @@ void Collective::eraseZone(Position pos, ZoneId id) {
 }
 
 void Collective::assignQuarters(Creature* c, Position pos) {
+  auto quarters = zones->getQuartersInfo(pos);    
   zones->assignQuarters(c->getUniqueId(), pos);
+  c->getAttributes().setHasQuarters(true);
+
+  if (quarters->id) {
+      auto matches = creatures.filter([&](Creature* c){
+        return c && c->getUniqueId() == quarters->id;
+      });
+
+      if (!matches.empty()) {
+        Creature* found = matches.front();
+        if (found->getUniqueId() != c->getUniqueId())
+          found->getAttributes().setHasQuarters(false);
+      }
+  }
 }
 
 const TaskMap& Collective::getTaskMap() const {

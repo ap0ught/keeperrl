@@ -23,8 +23,7 @@ ACHIEVEMENT_EFFECT_NAME "Odblokowanie osiągnięcia"
 ADD_CONSUMABLE "Dodaj przedmiot do spożycia"
 ADD_DUNGEON "Dodaj"
 ADD_EXPERIENCE_DESCRIPTION "Zwiększa doświadczenie bojowe istoty"
-ADD_EXPERIENCE_NAME "doświadczenie bojowe"
-    "doświadczenia bojowego" : genitive
+ADD_EXPERIENCE_NAME "Doświadczenie bojowe"
 ADD_RETIRED_DUNGEONS "Dodaj porzucone lochy"
 ADD_TO_TEAM_ACTION "Dodaj do drużyny"
 ADVENTURER masculine "poszukiwacz przygód"
@@ -78,18 +77,6 @@ ANIMATED_OBJECT "{ANIMATED_OBJECT_HELPER:1} {1}"
 ANIMATE_WEAPONS_EFFECT_DESCRIPTION "Ożywia do {1} broni w otoczeniu."
 ANIMATE_WEAPONS_EFFECT_NAME "ożywienie broni"
     "ożywienia broni" : genitive
-ANIMATE_SMALL_ITEMS_EFFECT_DESCRIPTION "Ożywia do {1} małych przedmiotów w otoczeniu."
-ANIMATE_SMALL_ITEMS_EFFECT_NAME "ożywienie małych przedmiotów"
-    "ożywienia małych przedmiotów" : genitive
-ANIMATE_MEDIUM_ITEMS_EFFECT_DESCRIPTION "Ożywia do {1} średnich przedmiotów w otoczeniu."
-ANIMATE_MEDIUM_ITEMS_EFFECT_NAME "ożywienie średnich przedmiotów"
-    "ożywienia średnich przedmiotów" : genitive
-ANIMATE_FURNITURE_EFFECT_DESCRIPTION "Ożywia do {1} mebli w otoczeniu."
-ANIMATE_FURNITURE_EFFECT_NAME "ożywienie mebli"
-    "ożywienia mebli" : genitive
-ANIMATE_WALLS_EFFECT_DESCRIPTION "Ożywia do {1} ścian otoczeniu."
-ANIMATE_WALLS_EFFECT_NAME "ożywienie ścian"
-    "ożywienia ścian" : genitive
 APPEARS "{1} pojawia się znikąd!"
 APPLYING_ITEM_TAKES_X_TURNS "Użycie {1:genitive} zajmuje {2} tury. Czy na pewno kontynuować?"
 ARCHERY_RANGE_TASK "Strzelaj na strzelnicy"
@@ -138,7 +125,7 @@ BANISH_EFFECT_DESCRIPTION "Istota opuści wioskę na zawsze."
 BANISH_EFFECT_NAME "wygnanie"
     "wygnania" : genitive
 BASHES_FURNITURE "{1} wali w {2:accusative}"
-BECOMES "{1} staje się {2:instrumental,1}."
+BECOMES "{1} staje się {2:instrumental}."
 BED neuter "łóżko"
     "łóżka" : genitive
     "łóżkiem" : instrumental
@@ -289,7 +276,7 @@ BUFF_ADJECTIVE_BLIND "ślepy"
     "ślepe" : neuter
 BUFF_ADJECTIVE_STUNNED "pojmany"
     "pojmana" : feminine
-    "pojmane" : neuter
+    "pojmay" : neuter
 BUFF_ADJECTIVE_COLLAPSED "przewrócony"
     "przewrócona" : feminine
     "przewrócone" : neuter
@@ -727,10 +714,9 @@ KEEPER_F feminine "strażniczka"
     "strażniczki" : plural, accusative
 KEY_ENTER "[Enter]"
 KEY_MODIFIER "{1} + {2}"
-KILLED_BY_HELPER "zabity" "zabita" : feminine "zabite" : neuter
-KILLED_BY_SUNLIGHT "{KILLED_BY_HELPER} przez światło słoneczne"
-KILLED_BY_TORTURE "{KILLED_BY_HELPER} podczas tortur"
-KILLED_BY "{KILLED_BY_HELPER} przez {1:accusative}"
+KILLED_BY_SUNLIGHT "zabity przez światło słoneczne"
+KILLED_BY_TORTURE "zabity podczas tortur"
+KILLED_BY "zabity przez {1:accusative}"
 IS_KILLED_BY "{1} zostaje {2:1} przez {3:accusative}."
 YOU_KILLED_BY "Zostajesz {2} przez {1:accusative}."
 KILLED_MEMBERS_TRIGGER "Zabici członkowie plemienia"
@@ -1049,9 +1035,6 @@ TASKS "Zadania"
 TEAM_TASK "Zadanie drużyny: {1}"
 TEMPORARY_POLYMORPH_EFFECT_NAME "tymczasowa przemiana"
     "tymczasowej przemiany" : genitive
-TEMPORARY_POLYMORPH_EFFECT_NAME2 "tymczasowa przemiana w {1:accusative}"
-    "tymczasowej przemiany w {1:accusative}" : genitive
-YOUNG_WOMAN feminine "młoda kobieta" "młodą kobietę" : accusative
 PERMANENT_POLYMORPH_EFFECT_NAME "stała przemiana"
     "stałej przemiany" : genitive
 TEN "dziesięć"
@@ -1663,10 +1646,7 @@ IMMIGRANTS_LABEL "imigranci"
 INTRINSIC_ATTACKS_LABEL "Wrodzone ataki"
 IS_BLEEDING "{1} krwawi!"
 IS_CAPTURED "{1} zostaje pojmany."
-DROWNED_HELPER "utopiony"
-    "utopiona" : feminine
-    "utopione" : neuter
-IS_DROWNED_BY "{1} zostaje {DROWNED_HELPER:1} przez {2:accusative}."
+IS_DROWNED_BY "{1} zostaje utopiony przez {2:accusative}."
 IS_EATEN_BY "{1} zostaje pożarty przez {2:accusative}."
 IS_EXTINGUISHED "Płomienie {1:genitive} zostają ugaszone."
 IS_LESS_AWARE_OF_DANGER "{1} jest mniej świadomy zagrożenia."
@@ -1740,16 +1720,7 @@ PULL_EFFECT_NAME "przyciągnięcie"
     "przyciągnięcia" : genitive
 PUNCH "Uderzasz {1:accusative}."
 PUNCHES "{1} uderza {2:accusative}."
-PECK "Dziobiesz {1:accusative}."
-PECKS "{1} dziobie {2:accusative}."
 PUTS_ON_SUNGLASSES "{1} zakłada okulary przeciwsłoneczne."
-TURNS_INTO_WOMAN "{1} zamienia się w piękną, młodą kobietę!"
-YOU_TURN_INTO_WOMAN "Zamieniasz się w piękną, młodą kobietę!"
-TURNS_BACK_INTO_WITCH "{1} zamienia się z powrotem w starą wiedźmę!"
-YOU_TURN_BACK_INTO_WITCH "Zamieniasz się z powrotem w starą wiedźmę!"
-BUFF_ADJECTIVE_WITCH "maskuje się"
-BUFF_WITCH "maskowanie"
-BUFF_DESC_WITCH "Czar zamienia w młodą kobietę. Wszystkie istoty stają się przyjazne."
 QUARTERS_LABEL "Kwatery:"
 QUARTERS_UNASSIGNED_LABEL "Nieprzydzielone"
 RANDOM_POLYMORPH_EFFECT_DESCRIPTION "Przekształca istotę w losową formę."
@@ -1909,6 +1880,7 @@ YOUR_SPURS_STOP_SPINNING "Twoje ostrogi przestają się kręcić."
 YOU_SHATTER "Rozpadasz się na tysiąc kawałków!"
 SHATTERS "{1} rozpada się na tysiąc kawałków!"
 YOU_SPIN_YOUR_SPURS "Kręcisz swoimi ostrogami."
+YOU_SQUASHED_BY "Zostajesz zmiażdżony przez {1:accusative}!"
 YOU_STOP_BURNING "Przestajesz płonąć."
 YOU_THROW "Rzucasz {1:accusative}."
 YOU_TRIGGER_SOMETHING "Aktywujesz coś."
@@ -2041,7 +2013,7 @@ OBJECT_FILLS_HOLE "{1} zapełnia {2:accusative}."
 STATUE_OF_SAINT "{1} świętego: {2}"
 ACHIEVEMENT_UNLOCKED "Osiągnięcie odblokowane: {1}"
 AND_SO_DIES "I tak umiera {1}."
-AND_SO_DIES_OF_REASON "I tak umiera {1}, {2:1}."
+AND_SO_DIES_OF_REASON "I tak umiera {1}, {2}."
 NO_FUNCTIONAL_BODY_PART "Brak funkcjonującej części ciała: {1}"
 X_TO_VILLAGE_ACTION ": {1}"
 ITEM_BURNS_OUT "{1} wypala się."
@@ -2677,7 +2649,7 @@ BUFFS_PREACHING_NAME "Odpraw Mszę"
 BUFFS_REGENERATION_ADDEDMESSAGE "Zaczynasz się regenerować."
 BUFFS_REGENERATION_ADDEDMESSAGE2 "{1} zaczyna się regenerować."
 BUFFS_REGENERATION_ADJECTIVE "regenerujący się"
-    "regenerująca się" : feminine
+    "regenerująca się" : feminie
     "regenerujące się" : neuter
 BUFFS_REGENERATION_DESCRIPTION "Odnawia niewielką ilość zdrowia co turę."
 BUFFS_REGENERATION_NAME feminine "regeneracja"
@@ -2685,7 +2657,7 @@ BUFFS_REGENERATION_NAME feminine "regeneracja"
 BUFFS_REGENERATION_REMOVEDMESSAGE "Przestajesz się regenerować."
 BUFFS_REGENERATION_REMOVEDMESSAGE2 "{1} przestaje się regenerować."
 BUFFS_SINNED_ADJECTIVE "grzesznik powszedni"
-    "grzeszniczka powszednia" : feminine
+    "grzeszniczka powszedna" : feminine
 BUFFS_SINNED_DESCRIPTION "Istota popełniła grzech i szuka przebaczenia."
 BUFFS_SINNED_NAME "grzech powszedni"
     "grzechu powszedniego" : genitive
@@ -2809,8 +2781,8 @@ BUILD_MENU_HELP85 "Przywołuje wszystkie sługi"
 BUILD_MENU_HELP86 "Unieruchamia intruza na pewien czas."
 BUILD_MENU_HELP87 "Teleportuje pobliskie sługi, by rozprawiły się z intruzem."
 BUILD_MENU_HELP88 "Wznieca słup ognia pod intruzem."
-BUILD_MENU_HELP89 "Wypuszcza ogromny głaz toczący się na wroga."
-BUILD_MENU_HELP8 "Można tu składować drewno, żelazo, granit i inne złoża."
+BUILD_MENU_HELP89 "Wysyła ogromny głaz toczący się na wroga."
+BUILD_MENU_HELP8 "Można tu składować drewno, żelazo, granit i adamantium."
 BUILD_MENU_HELP90 "Tworzy podmuch powietrza, który odrzuca wroga o kilka pól."
 BUILD_MENU_HELP91 "Ożywa, gdy w pobliżu znajduje się wróg."
 BUILD_MENU_HELP92 "Uruchamia wszystkie inne pułapki w pobliżu."
@@ -2982,7 +2954,7 @@ CREATURE_ATTRIBUTES_ANT_SOLDIER_NAME masculine "żołnierz olbrzymiej mrówki"
     "żołnierzami olbrzymich mrówek" : plural,instrumental
     "żołnierzy olbrzymich mrówek" : plural,accusative
 
-CREATURE_ATTRIBUTES_ANT_WORKER_NAME feminine "olbrzymia mrówka"
+CREATURE_ATTRIBUTES_ANT_WORKER_NAME masculine "olbrzymia mrówka"
     "olbrzymiej mrówce" : dative
     "olbrzymiej mrówki" : genitive
     "olbrzymią mrówką" : instrumental
@@ -3693,7 +3665,7 @@ CREATURE_ATTRIBUTES_ELF_ARCHER_NAME masculine "elfi łucznik"
     "elfimi łucznikami" : plural,instrumental
     "elfich łuczników" : plural,accusative
 
-CREATURE_ATTRIBUTES_ELF_CHILD_NAME neuter "elfie dziecko"
+CREATURE_ATTRIBUTES_ELF_CHILD_NAME masculine "elfie dziecko"
     "elfiemu dziecku" : dative
     "elfiego dziecka" : genitive
     "elfim dzieckiem" : instrumental
@@ -4807,16 +4779,6 @@ CREATURE_ATTRIBUTES_SNAKE_NAME masculine "wąż"
     "wężami" : plural,instrumental
     "węże" : plural,accusative
 
-CREATURE_ATTRIBUTES_LIZARD_NAME masculine "jaszczur"
-    "jaszczurowi" : dative
-    "jaszczura" : genitive
-    "jaszczurem" : instrumental
-    "jaszczura" : accusative
-    "jaszczury" : plural
-    "jaszczurów" : plural,genitive
-    "jaszczurami" : plural,instrumental
-    "jaszczury" : plural,accusative
-
 CREATURE_ATTRIBUTES_SOFT_MONSTER_NAME masculine "miękki potwór"
     "miękkiemu potworowi" : dative
     "miękkiego potwora" : genitive
@@ -5163,30 +5125,6 @@ CREATURE_ATTRIBUTES_WITCH_NAME feminine "wiedźma"
     "wiedźmami" : plural,instrumental
     "wiedźmy" : plural,accusative
 
-CREATURE_ATTRIBUTES_NIGHT_HAG_NAME feminine "nocna zmora"
-    "nocnej zmorze" : dative
-    "nocnej zmory" : genitive
-    "nocną zmorą" : instrumental
-    "nocną zmorę" : accusative
-    "nocne zmory" : plural
-    "nocnych zmor" : plural,genitive
-    "noncymi zmorami" : plural,instrumental
-    "nocne zmory" : plural,accusative
-
-YOU_PULL_WITH_YOUR_HAIR "Oplątujesz {1:accusative} swoimi włosami i przyciągasz do siebie."
-PULLS_WITH_HER_HAIR "{1} oplątuje {2:accusative} swoimi włosami i przyciąga do siebie."
-
-CREATURE_ATTRIBUTES_STRIX_NAME feminine "strzyga"
-    "strzydze" : dative
-    "strzygi" : genitive
-    "strzygą" : instrumental
-    "strzygę" : accusative
-    "strzygi" : plural
-    "strzyg" : plural,genitive
-    "strzygami" : plural,instrumental
-    "strzygi" : plural,accusative
-
-
 CREATURE_ATTRIBUTES_WOLF_GROUPNAME neuter "stado"
     "stada" : genitive
     "stadem" : instrumental
@@ -5332,15 +5270,6 @@ ENEMIES_VILLAGE_RACE "ludzie"
 ENEMIES_WARRIORS_RACE "ludzie"
 ENEMIES_WITCH_RACE "wiedźma"
 ENEMIES_WOLF_DEN_RACE "wilki"
-FURNITURE_EFFIGY_NAME feminine "kukła"
-    "kukły" : genitive
-    "kukłą" : instrumental
-    "kukłę" : accusative
-    "kukły" : plural
-    "kukieł" : plural,genitive
-    "kukłami" : plural,instrumental
-    "kukły" : plural,accusative
-
 FURNITURE_ADA_DOOR_NAME plural "adamantynowe drzwi"
     "adamantynowe drzwi" : plural
     "adamantynowych drzwi" : plural,genitive
@@ -6206,7 +6135,7 @@ FURNITURE_JEWELLER_NAME1 masculine "magmowy stół jubilerski"
     "magmowymi stołami jubilerskimi" : plural,instrumental
     "magmowe stoły jubilerskie" : plural,accusative
 
-FURNITURE_JEWELLER_NAME2 masculine "stół do pisania poezji"
+FURNITURE_JEWELLER_NAME2 feminine "stół do pisania poezji"
     "stołu do pisania poezji" : genitive
     "stołem do pisania poezji" : instrumental
     "stół do pisania poezji" : accusative
@@ -6215,7 +6144,7 @@ FURNITURE_JEWELLER_NAME2 masculine "stół do pisania poezji"
     "stołami do pisania poezji" : plural,instrumental
     "stoły do pisania poezji" : plural,accusative
 
-FURNITURE_JEWELLER_NAME3 masculine "stół jadalny"
+FURNITURE_JEWELLER_NAME3 feminine "stół jadalny"
     "stołu jadalnego" : genitive
     "stołem jadalnym" : instrumental
     "stół jadalny" : accusative
@@ -6264,7 +6193,7 @@ FURNITURE_KEEPER_BOARD_NAME masculine "tablica ogłoszeń"
     "tablicami ogłoszeń" : plural,instrumental
     "tablice ogłoszeń" : plural,accusative
 
-FURNITURE_LABORATORY_NAME1 neuter "zaczarowane laboratorium"
+FURNITURE_LABORATORY_NAME1 feminine "zaczarowane laboratorium"
     "zaczarowanego laboratorium" : genitive
     "zaczarowanym laboratorium" : instrumental
     "zaczarowane laboratorium" : accusative
@@ -6281,15 +6210,6 @@ FURNITURE_LABORATORY_NAME neuter "laboratorium"
     "laboratoriów" : plural,genitive
     "laboratoriami" : plural,instrumental
     "laboratoria" : plural,accusative
-
-FURNITURE_WITCH_LAB_NAME "kocioł do gotowania dzieci"
-    "kotła do gotowania dzieci" : genitive
-    "kotłem do gotowania dzieci" : instrumental
-    "kocioł do gotowania dzieci" : accusative
-    "kotły do gotowania dzieci" : plural
-    "kotłów do gotowania dzieci" : plural,genitive
-    "kotłami do gotowania dzieci" : plural,instrumental
-    "kotły do gotowania dzieci" : plural,accusative
 
 FURNITURE_LOOT_COFFIN_NAME feminine "trumna"
     "trumny" : genitive
@@ -6940,7 +6860,7 @@ FURNITURE_TORCH_NAME masculine "pochodnia"
     "pochodniami" : plural,instrumental
     "pochodnie" : plural,accusative
 
-FURNITURE_CANDELABRUM_NAME masculine "kandelabr"
+ FURNITURE_CANDELABRUM_NAME masculine "kandelabr"
     "kandelabra" : genitive
     "kandelabrem" : instrumental
     "kandelabr" : accusative
@@ -8299,7 +8219,6 @@ KEEPER_CREATURES_BASENAME6 "Zielonoskórzy"
 KEEPER_CREATURES_BASENAME7 "Zombiaki"
 KEEPER_CREATURES_BASENAME8 "Pustelnik"
 KEEPER_CREATURES_BASENAME9 "Poszukiwacz przygód"
-KEEPER_CREATURES_BASENAME10 "Wiedźma"
 KEEPER_CREATURES_BASENAME "Klasyczny"
 
 PROMOTIONS_ID10 "Zwiększa trening obrażeń od czarów o 1."
@@ -8332,11 +8251,6 @@ RESOURCE_INFO_CORPSE_NAME plural "zwłoki"
     "zwłoki" : accusative
 
 RESOURCE_INFO_DEMON_PIETY_NAME "rytuały"
-RESOURCE_INFO_COOKED_CHILDREN_NAME "ugotowane dzieci"
-    "ugotowanych dzieci" : genitive
-    "ugotowanymi dziećmi" : instrumental
-    "ugotowane dzieci" : accusative
-A_CHILD_IS_COOKED "Dziecko wpada do kotła!"
 RESOURCE_INFO_INFERNITE_NAME "infernit"
 RESOURCE_INFO_IRON_NAME "żelazo"
 RESOURCE_INFO_PRISONER_HEAD_NAME "głowy więźniów"
@@ -8809,9 +8723,6 @@ BUFFS_HATE_HUMANS_NAME "ludzie"
 BUFFS_HATE_LIZARDMEN_NAME "jaszczuroludzie"
     "jaszczuroludzi" : genitive
     "jaszczuroludziom" : dative
-BUFFS_HATE_CHILDREN_NAME "dzieci"
-    "dzieci" : genitive
-    "dzieciom" : dative
 BUFFS_HATE_UNDEAD_NAME "nieumarli"
     "nieumarłych" : genitive
     "nieumarłym" : dative
@@ -9297,7 +9208,7 @@ KEEPER_CREATURES_POPULATIONSTRING2 "zombie"
 KEEPER_CREATURES_DESCRIPTION8 "Zbuduj lochy jako samotny cyklop."
 KEEPER_CREATURES_DESCRIPTION9 "Wędruj po świecie w poszukiwaniu przygód i łupów!"
 KEEPER_CREATURES_DESCRIPTION10 "Graj jako Zły Bóg Adoxie i zetrzyj w proch śmiertelników."
-KEEPER_CREATURES_DESCRIPTION11 "Graj jako wiedźma. Lataj na miotle, porywaj dzieci i rzucaj klątwy na przeciwników."
+
 TILE_GAS_TYPES_POISON_GAS_THIRDPERSON1 "trujący gaz"
 
 BUFFS_INFERNITE_EFFECT_THIRDPERSON1 "infernit"
@@ -9730,8 +9641,8 @@ UNLOCK_ALL_OPTION_NAME "Odblokuj wszystkie ukryte funkcje gry"
 EXP_INCREASE_OPTION_NAME "Krzywa trudności wrogów"
 DPI_AWARE_OPTION_NAME "Nadpisz skalowanie DPI w Windows"
 LANGUAGE_OPTION_NAME "Język"
-CHOOSE_LANGUAGE "Wybierz język:"
 OPTION_NAME_AND_VALUE "{1}: {2}"
+
 HINTS_OPTION_DESCRIPTION "Wyświetlaj dodatkowe wskazówki w trakcie gry."
 ASCII_OPTION_DESCRIPTION "Przełącz na tradycyjną, tekstową grafikę roguelike."
 KEEP_SAVEFILES_OPTION_DESCRIPTION "Nie usuwaj pliku zapisu po wczytaniu gry."
@@ -9961,7 +9872,6 @@ DISTILLATION_MINION_ACTIVITY "Destylacja"
 BE_WHIPPED_MINION_ACTIVITY "Bycie chłostanym"
 BE_TORTURED_MINION_ACTIVITY "Bycie torturowanym"
 BE_EXECUTED_MINION_ACTIVITY "Bycie straconym"
-BE_COOKED_MINION_ACTIVITY "Bycie ugotowanym"
 PHYLACTERY_MINION_ACTIVITY "Filakterium"
 PREACHING_MINION_ACTIVITY "Odprawianie Mszy"
 MASS_MINION_ACTIVITY "Uczestnictwo we Mszy"
@@ -10112,26 +10022,6 @@ EXP_INCREASE_EXTREME "ekstremalna"
 SUBJECT_GENDER "{1:2}"
 NEW_LINE "{1}
 {2}"
-SETTING_OFF "wyłączone"
-WITCH_CURSE_SCHOOL "klątwy"
-WITCH_POLYMORPH_SCHOOL "przemiany"
-WITCH_ANIMALS_SCHOOL "zwierzęta"
-WITCH_ANIMATION_SCHOOL "ożywianie"
-WITCH_CURSE_MESSAGE1 "Uczysz się rzucać klątwę „choroba”."
-WITCH_CURSE_MESSAGE2 "Uczysz się rzucać klątwę „obłęd”."
-WITCH_CURSE_MESSAGE3 "Uczysz się rzucać klątwę „krwawienie”."
-WITCH_CURSE_MESSAGE4 "Uczysz się rzucać klątwę „przemiana”."
-WITCH_POLYMORPH_MESSAGE1 "Uczysz się przemieniać w młodą kobietę."
-WITCH_POLYMORPH_MESSAGE2 "Uczysz się przemieniać w strzygę."
-WITCH_POLYMORPH_MESSAGE3 "Uczysz się przemieniać w nocną zmorę."
-WITCH_ANIMALS_MESSAGE1 "Uczysz się przyzywać pająki."
-WITCH_ANIMALS_MESSAGE2 "Uczysz się przyzywać węże."
-WITCH_ANIMALS_MESSAGE3 "Uczysz się przyzywać jaszczury."
-WITCH_ANIMALS_MESSAGE4 "Uczysz się przyzywać krakena."
-WITCH_ANIMATION_MESSAGE1 "Uczysz się ożywiać niewielkie przedmioty."
-WITCH_ANIMATION_MESSAGE2 "Uczysz się ożywiać średnie przedmioty."
-WITCH_ANIMATION_MESSAGE3 "Uczysz się ożywiać meble."
-WITCH_ANIMATION_MESSAGE4 "Uczysz się ożywiać ściany."
 TEXT128 "Nie znaleziono strony. Skontaktuj się z autorem moda."
 TEXT129 "Oprócz kopania fortecy pod górą, możesz także konstruować budynki na powierzchni. Budynki mogą mieć wiele pięter i nie ma limitu liczby schodów pomiędzy tzw. poziomami Z."
 TEXT130 "1. Na zewnątrz wyznacz „wnętrze budynku”."
@@ -10152,7 +10042,7 @@ TEXT144 "Po ustaleniu wartości ataku stosujemy specjalne premie, np. niektóre 
 TEXT145 "Ofiara korzysta z atrybutu obrony jako podstawy i podobnie stosuje swoje premie. Następnie mnożymy lub dzielimy ją przez 1,3, jeśli istota jest odporna lub wrażliwa na dany rodzaj ataku (np. odporność na magię podnosi obronę o 30% przeciw atakom magicznym)."
 TEXT146 "Obliczamy też mnożnik osaczenia w zależności od liczby wrogów otaczających ofiarę. Za każdego dodatkowego wroga finalna obrona dzieli się przez 1,07. Przeciwdziała temu atrybut parowania, który podnoszą np. tarcze."
 TEXT147 "Po zestawieniu finalnej wartości ataku i obrony dzielimy je przez siebie i stosujemy krzywą obrażeń, która mówi ostatecznie, ile życia traci ofiara."
-TEXT148 "Jeśli atak jest 2,2 razy wyższy niż obrona, ofiara traci całe życie. Jeśli są równe, traci 12% punktów życia. Jeśli atak stanowi 0,6 obrony lub mniej, atak jest nieszkodliwy."
+TEXT148 "Jeśli atak jest 2,2 razy wyższy niż obrona, ofiara traci całe życie# jeśli są równe, traci 12% punktów życia# jeśli atak stanowi 0,6 obrony lub mniej, atak jest nieszkodliwy."
 TEXT149 "Dalsze skutki zależą od typu ofiary. Istoty z ciałem, ogniem lub duchem mają normalne punkty życia, od których odejmujemy obrażenia. Inne, np. nieumarli, golemy i automaty, ryzykują utratę kończyny lub rozpad w zależności od wielkości obrażeń – nie mają klasycznego licznika życia."
 TEXT150 "Wstawianie stref wartowania pozwala ustawiać twoich sług w wybranych miejscach, aby pilnowali wejść czy korytarzy."
 TEXT151 "1. Wybierz jeden z trzech kolorów stref warty i ustaw go na mapie. Najlepiej jedno pole na jednego sługę, którego chcesz postawić na warcie."
@@ -10274,9 +10164,16 @@ IMMIGRATION_HELP_CONTROLLER1 "Prawy spust"
 IMMIGRATION_HELP_CONTROLLER2 "lewy spust"
 IMMIGRATION_HELP_MOUSE1 "Lewy przycisk myszy"
 IMMIGRATION_HELP_MOUSE2 "prawy przycisk myszy"
-GAME_INTRO "Witamy w KeeperRL v1.3, wydanym 26 października 2025 roku.
+GAME_INTRO "Witamy w KeeperRL v1.2, wydanym 4 lipca 2025 roku.
 
-Ta aktualizacja dodaje grywalną postać Wiedźmy, wyspecjalizowaną w rzucaniu klątw, porywaniu dzieci oraz przemianach w odrażające stwory.
+Ta aktualizacja wprowadza obsługę lokalizacji w KeeperRL, a pierwszym dodatkowym językiem dostępnym w grze jest język polski. Wkrótce pojawią się kolejne wersje językowe. Poza tym aktualizacja zawiera dziesiątki mniejszych ulepszeń poprawiających komfort gry, między innymi:
 
-Jeśli grasz w KeeperRL po raz pierwszy, pamiętaj, aby rozpocząć od samouczka!
+* Podwójne kliknięcie na złożu surowców zaznacza cały obszar do wykopania.
+* Wszystkie nieumarłe stworzenia, w tym wierzchowce, będą spały w trumnach, co pozwoli im leczyć części ciała.
+* Bestiariusz wyposażono teraz w wyszukiwarkę.
+* Shift+kliknięcie w oknie warsztatu powoduje dodanie do kolejki produkcji od razu 5 sztuk przedmiotu.
+
+…i wiele innych!
+
+Jeżeli grasz w KeeperRL po raz pierwszy, pamiętaj, aby zacząć od samouczka!
 "

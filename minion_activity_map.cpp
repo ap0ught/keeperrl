@@ -50,7 +50,6 @@ bool MinionActivityMap::canChooseRandomly(const Collective* collective, const Cr
     case MinionActivity::BE_EXECUTED:
     case MinionActivity::BE_WHIPPED:
     case MinionActivity::BE_TORTURED:
-    case MinionActivity::WITCH_CAULDRON:
       return false;
     case MinionActivity::PREACHING:
       return collective->lastMass < collective->getLocalTime() - 1500_visible;
@@ -154,8 +153,6 @@ bool MinionActivityMap::isAvailable(const Collective* col, const Creature* c, Mi
       return c->isAffected(BuffId("CONFESSING_SKILL"));
     case MinionActivity::CONFESSION:
       return c->isAffected(BuffId("SINNED")) || c->isAffected(BuffId("MORTAL_SINNED"));
-    case MinionActivity::WITCH_CAULDRON:
-      return c->getStatus().contains(CreatureStatus::PRISONER) && c->getAttributes().getHatedByEffect() == BuffId("HATE_CHILDREN");
   }
 }
 

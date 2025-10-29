@@ -345,16 +345,6 @@ static string getSantaSprite(const string& sprite) {
   return sprite;
 }
 
-static string getHalloweenSprite(const string& sprite) {
-  vector<vector<const char*>> viewIds {{ "standing_torch"},
-        {"pumpkin"}};
-  for (int column : Range(2))
-    for (int i : All(viewIds[column]))
-      if (sprite == viewIds[column][i])
-        return viewIds[1 - column][i];
-  return sprite;
-}
-
 bool TileSet::loadTilesFromDir(const DirectoryPath& path, Vec2 size, bool overwrite) {
   if (!path.exists())
     return false;
@@ -402,9 +392,8 @@ bool TileSet::loadTilesFromDir(const DirectoryPath& path, Vec2 size, bool overwr
     }
   texturesTmp.push_back({image, addedPositions});
   bool isChristmas = Clock::isChristmas();
-  bool isHalloween = Clock::isHalloween();
   for (auto& pos : addedPositions) {
-    auto spriteName = isChristmas ? getSantaSprite(pos.first) : isHalloween ? getHalloweenSprite(pos.first) : pos.first;
+    auto spriteName = isChristmas ? getSantaSprite(pos.first) : pos.first;
     tileCoords[spriteName].push_back({size, pos.second, nullptr});
   }
   return true;

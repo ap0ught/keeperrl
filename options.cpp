@@ -455,7 +455,7 @@ void Options::handleIntInterval(OptionId option, ScriptedUIDataElems::Record& da
   auto value = getIntValue(option);
   auto interval = *getIntInterval(option);
   auto range = *getIntRange(option);
-  data.elems.insert({"value", value > 0 ? TString(getValueString(option)) : TStringId("SETTING_OFF")});
+  data.elems.insert({"value", TString(value > 0 ? getValueString(option) : "off"_s)});
   data.elems.insert({"increase", ScriptedUIDataElems::Callback{
       [this, &wasSet, option, value, interval, range] {
         auto newVal = value + interval;
@@ -476,20 +476,21 @@ void Options::handleIntInterval(OptionId option, ScriptedUIDataElems::Record& da
       }}});
 }
 
-void Options::handleStringList(OptionId option, ScriptedUIDataElems::Record& data, View* view, bool& wasSet) {
+void Options::handleStringList(OptionId option, ScriptedUIDataElems::Record& data, bool& wasSet) {
   auto value = getIntValue(option);
   data.elems.insert({"value", TString(getValueString(option))});
-  auto languages = choices[option].transform([](const string& s){ return TString(s); });
-  data.elems.insert({"callbackBool",
-    ScriptedUIDataElems::Callback {
-      [option, &wasSet, languages, view, this] {
+  data.elems.insert({"increase", ScriptedUIDataElems::Callback{
+      [this, &wasSet, option, value] {
+        this->setValue(option, (value + 1) % choices[option].size());
         wasSet = true;
-        if (auto res = view->multiChoice(TStringId("CHOOSE_LANGUAGE"),  languages))
-          this->setValue(option, *res);
         return true;
-      }
-    }
-  });
+      }}});
+  data.elems.insert({"decrease", ScriptedUIDataElems::Callback{
+      [this, &wasSet, option, value] {
+        this->setValue(option, (value + choices[option].size() - 1) % choices[option].size());
+        wasSet = true;
+        return true;
+      }}});
 }
 
 void Options::handleSliding(OptionId option, ScriptedUIDataElems::Record& data, bool& wasSet) {
@@ -557,7 +558,7 @@ void Options::handle(View* view, const ContentFactory* factory, OptionSet set, i
           handleSliding(option, optionData, wasSet);
       }
       else if (!choices[option].empty())
-        handleStringList(option, optionData, view, wasSet);
+        handleStringList(option, optionData, wasSet);
       options.push_back(std::move(optionData));
     }
     ScriptedUIDataElems::List keybindings;

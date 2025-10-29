@@ -50,6 +50,11 @@ void Workshops::Type::queue(Collective* collective, int index, int requiredSkill
   updateState(collective);
 }
 
+void Workshops::Type::changePriority(Collective* collective, int firstIdx, int middleIdx, int lastIdx) {
+  moveBlock(queued, firstIdx, middleIdx, lastIdx);
+  updateState(collective);
+}
+
 void Workshops::Type::updateState(Collective* collective) {
   for (auto& elem : queued)
     if (!elem.paid && collective->hasResource(elem.item.cost)) {

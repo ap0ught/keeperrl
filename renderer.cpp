@@ -171,72 +171,6 @@ static optional<Vec2> getMapFontOffset(char32_t c) {
     case U'ś': return Vec2(434, 28);
     case U'ż': return Vec2(446, 28);
     case U'ź': return Vec2(456, 28);
-    case U'А': return Vec2(0, 56);
-    case U'Б': return Vec2(14, 56);
-    case U'В': return Vec2(28, 56);
-    case U'Г': return Vec2(42, 56);
-    case U'Д': return Vec2(56, 56);
-    case U'Е': return Vec2(70, 56);
-    case U'Ё': return Vec2(84, 56);
-    case U'Ж': return Vec2(98, 56);
-    case U'З': return Vec2(112, 56);
-    case U'И': return Vec2(126, 56);
-    case U'Й': return Vec2(140, 56);
-    case U'К': return Vec2(154, 56);
-    case U'Л': return Vec2(168, 56);
-    case U'М': return Vec2(182, 56);
-    case U'Н': return Vec2(196, 56);
-    case U'О': return Vec2(210, 56);
-    case U'П': return Vec2(224, 56);
-    case U'Р': return Vec2(238, 56);
-    case U'С': return Vec2(252, 56);
-    case U'Т': return Vec2(266, 56);
-    case U'У': return Vec2(280, 56);
-    case U'Ф': return Vec2(294, 56);
-    case U'Х': return Vec2(308, 56);
-    case U'Ц': return Vec2(322, 56);
-    case U'Ч': return Vec2(336, 56);
-    case U'Ш': return Vec2(350, 56);
-    case U'Щ': return Vec2(0, 84);
-    case U'Ъ': return Vec2(14, 84);
-    case U'Ы': return Vec2(28, 84);
-    case U'Ь': return Vec2(42, 84);
-    case U'Э': return Vec2(56, 84);
-    case U'Ю': return Vec2(70, 84);
-    case U'Я': return Vec2(84, 84);
-    case U'а': return Vec2(364, 56);
-    case U'б': return Vec2(376, 56);
-    case U'в': return Vec2(388, 56);
-    case U'г': return Vec2(400, 56);
-    case U'д': return Vec2(410, 56);
-    case U'е': return Vec2(424, 56);
-    case U'ё': return Vec2(436, 56);
-    case U'ж': return Vec2(448, 56);
-    case U'з': return Vec2(462, 56);
-    case U'и': return Vec2(474, 56);
-    case U'й': return Vec2(486, 56);
-    case U'к': return Vec2(498, 56);
-    case U'л': return Vec2(510, 56);
-    case U'м': return Vec2(522, 56);
-    case U'н': return Vec2(534, 56);
-    case U'о': return Vec2(546, 56);
-    case U'п': return Vec2(558, 56);
-    case U'р': return Vec2(570, 56);
-    case U'с': return Vec2(582, 56);
-    case U'т': return Vec2(594, 56);
-    case U'у': return Vec2(608, 56);
-    case U'ф': return Vec2(620, 56);
-    case U'х': return Vec2(634, 56);
-    case U'ц': return Vec2(644, 56);
-    case U'ч': return Vec2(364, 84);
-    case U'ш': return Vec2(376, 84);
-    case U'щ': return Vec2(390,84);
-    case U'ъ': return Vec2(404, 84);
-    case U'ы': return Vec2(416, 84);
-    case U'ь': return Vec2(430, 84);
-    case U'э': return Vec2(440, 84);
-    case U'ю': return Vec2(452, 84);
-    case U'я': return Vec2(466, 84);
   }
   return none;
 }
@@ -251,88 +185,22 @@ static optional<int> getMapFontWidth(char32_t c) {
   if (c >= 'a' && c <= 'z')
     return getMapFontOffset(c + 1)->x - getMapFontOffset(c)->x;
   switch (c) {
-    case U'Ć':
-    case U'Ź':
-    case U'Ż':
-    case U'Ł':
-    case U'Ó':
-    case U'Ś': return 14;
-    case U'ą': return 12;
-    case U'ć': return 10;
-    case U'ę': return 12;
-    case U'ł': return 10;
-    case U'ń': return 12;
-    case U'ó': return 12;
-    case U'ś': return 12;
-    case U'ż': return 10;
-    case U'ź': return 10;
-    case U'А':
-    case U'Б':
-    case U'В':
-    case U'Г':
-    case U'Д':
-    case U'Е':
-    case U'Ё':
-    case U'Ж':
-    case U'З':
-    case U'И':
-    case U'Й':
-    case U'К':
-    case U'Л':
-    case U'М':
-    case U'Н':
-    case U'О':
-    case U'П':
-    case U'Р':
-    case U'С':
-    case U'Т':
-    case U'У':
-    case U'Ф':
-    case U'Х':
-    case U'Ц':
-    case U'Ч':
-    case U'Ш':
-    case U'Щ':
-    case U'Ъ':
-    case U'Ы':
-    case U'Ь':
-    case U'Э':
-    case U'Ю':
-    case U'Я': return 14;
-    case U'а':
-    case U'б':
-    case U'в': return 12;
-    case U'г': return 10;
-    case U'д': return 14;
-    case U'е':
-    case U'ё': return 12;
-    case U'ж': return 14;
-    case U'з':
-    case U'и':
-    case U'й':
-    case U'к':
-    case U'л':
-    case U'м':
-    case U'н':
-    case U'о':
-    case U'п':
-    case U'р':
-    case U'с': return 12;
-    case U'т': return 14;
-    case U'у':
-    case U'ф': return 12;
-    case U'х': return 10;
-    case U'ц': return 14;
-    case U'ч': return 12;
-    case U'ш':
-    case U'щ': return 14;
-    case U'ъ': return 12;
-    case U'ы': return 14;
-    case U'ь': return 10;
-    case U'э': return 12;
-    case U'ю': return 14;
-    case U'я': return 12;
-  }
+     case U'Ć':
+     case U'Ź':
+     case U'Ż':
+     case U'Ł':
+     case U'Ó':
+     case U'Ś': return 14;
+     case U'ą': return 12;
+     case U'ć': return 10;
+     case U'ę': return 12;
+     case U'ł': return 10;
+     case U'ń': return 12;
+     case U'ó': return 12;
+     case U'ś': return 12;
+     case U'ż': return 10;
+     case U'ź': return 10;
+   }
   return none;
 }
 

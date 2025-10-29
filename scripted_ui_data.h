@@ -19,6 +19,7 @@ namespace ScriptedUIDataElems {
 using Label = TString;
 struct Callback {
   function<bool()> fun;
+  optional<function<bool()>> altFun;
   template <class Archive> void serialize(Archive& ar1, const unsigned int) {
     FATAL << "Can't deserialize Callback";
   }
@@ -94,7 +95,7 @@ struct ScriptedUIState {
   optional<int> highlightedElem;
   unordered_map<int, ScriptedUIDataElems::SliderState> sliderState;
   unordered_map<int, milliseconds> tooltipTimeouts;
-  unordered_map<string, Vec2> paragraphSizeCache;
+  unordered_map<string, int> paragraphSizeCache;
   ScriptedUIData highlightNext = ScriptedUIDataElems::Callback{
       [&elem = this->highlightedElem] { elem = elem.value_or(-1) + 1; return false; }};
   ScriptedUIData highlightPrevious = ScriptedUIDataElems::Callback{

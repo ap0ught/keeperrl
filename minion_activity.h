@@ -38,8 +38,7 @@ RICH_ENUM(
     MASS,
     PRAYER,
     HEARING_CONFESSION,
-    CONFESSION,
-    WITCH_CAULDRON
+    CONFESSION
 );
 
 class Position;

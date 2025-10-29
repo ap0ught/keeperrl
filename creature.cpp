@@ -81,10 +81,8 @@ void Creature::serialize(Archive& ar, const unsigned int version) {
   ar(controllerStack, kills, statuses, automatonParts, phylactery, highestAttackValueEver);
   ar(difficultyPoints, points, capture, spellMap, killTitles, companions, combatExperience, teamExperience);
   ar(vision, debt, lastCombatIntent, primaryViewId, steed, buffs, buffCount, buffPermanentCount);
-  if (version >= 1)
+  if (version == 1)
     ar(specialTraits);
-  if (version >= 2)
-    ar(getsKillCredits);
 }
 
 SERIALIZABLE(Creature)
@@ -1271,8 +1269,9 @@ void Creature::updateCombatExperience(Creature* victim) {
 Creature* Creature::getsCreditForKills() {
   for (auto pos : position.getRectangle(Rectangle::centered(10)))
     if (auto c = pos.getCreature())
-      if (c->getUniqueId() == getsKillCredits)
+      if (c->getCompanions(true).contains(this)) {
         return c;
+      }
   return this;
 }
 
@@ -1478,7 +1477,7 @@ bool Creature::processBuffs() {
 }
 
 static vector<Creature*> summonPersonal(Creature* c, CreatureId id, optional<int> strength,
-    optional<Position> position, bool getsKillCredit) {
+    optional<Position> position) {
   auto spirits = Effect::summon(c, id, 1, none, 0_visible, position);
   for (auto spirit : spirits) {
     if (strength) {
@@ -1491,8 +1490,6 @@ static vector<Creature*> summonPersonal(Creature* c, CreatureId id, optional<int
     spirit->getBody().setCanBeCaptured(false);
     if (!position)
       c->verb(TStringId("YOU_HAVE_SUMMONED"), TStringId("HAS_SUMMONED"), spirit->getName().a());
-    if (!getsKillCredit)
-      spirit->getsKillCredits = c->getUniqueId();
   }
   return spirits;
 }
@@ -1525,15 +1522,14 @@ void Creature::tickCompanions() {
       }
     }
   while (companions.size() < attributes->companions.size())
-    companions.push_back(CompanionGroup{{}, attributes->companions[companions.size()].statsBase/*,
-        attributes->companions[companions.size()].getsKillCredit*/});
+    companions.push_back(CompanionGroup{{}, attributes->companions[companions.size()].statsBase,
+        attributes->companions[companions.size()].getsKillCredit});
   for (int i : All(attributes->companions)) {
     auto& summonsInfo = attributes->companions[i];
     if (companions[i].creatures.size() < summonsInfo.count && Random.chance(summonsInfo.summonFreq))
       append(companions[i].creatures, summonPersonal(this, Random.choose(summonsInfo.creatures),
           summonsInfo.statsBase ? optional<int>(getAttr(*summonsInfo.statsBase)) : optional<int>(),
-          summonsInfo.spawnAway ? Effect::getSummonAwayPosition(this) : none,
-          summonsInfo.getsKillCredit));
+          summonsInfo.spawnAway ? Effect::getSummonAwayPosition(this) : none));
     if (summonsInfo.hostile)
       for (auto c : companions[i].creatures) {
         c->setTribe(TribeId::getHostile());
@@ -1542,12 +1538,13 @@ void Creature::tickCompanions() {
   }
 }
 
-vector<Creature*> Creature::getCompanions() const {
+vector<Creature*> Creature::getCompanions(bool withNoKillCreditOnly) const {
   vector<Creature*> ret;
   for (auto& group : companions)
-    for (auto c : group.creatures)
-      if (!c->isDead())
-        ret.push_back(c.get());
+    if (!withNoKillCreditOnly || !group.getsKillCredit)
+      for (auto c : group.creatures)
+        if (!c->isDead())
+          ret.push_back(c.get());
   return ret;
 }
 
@@ -1684,7 +1681,7 @@ void Creature::onAttackedBy(Creature* attacker) {
     // This attack may be accidental, so only do this for creatures from another tribe.
     // To handle intended attacks within one tribe, private enemy will be added in addCombatIntent
     privateEnemies.set(attacker, *globalTime);
-  lastAttacker = attacker->getsCreditForKills();
+  lastAttacker = attacker;
   addCombatIntent(attacker, CombatIntentInfo::Type::ATTACK);
   if (hasAlternativeViewId())
     attacker->tryToDestroyLastingEffect(LastingEffect::SPYING);
@@ -2706,6 +2703,10 @@ bool Creature::canNavigateToOrNeighbor(Position pos) const {
 
 bool Creature::canNavigateTo(Position pos) const {
   return pos.canNavigateTo(position, getMovementType());
+}
+
+bool Creature::hasQuarters() const {
+  return getAttributes().getHasQuarters();
 }
 
 CreatureAction Creature::moveTowards(Position pos, bool away, NavigationFlags flags) {

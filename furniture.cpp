@@ -558,10 +558,6 @@ bool Furniture::isEyeball() const {
   return eyeball;
 }
 
-bool Furniture::canAnimate() const {
-  return !!getViewObject() && onBuilt != FurnitureOnBuilt::DOWN_STAIRS && onBuilt != FurnitureOnBuilt::UP_STAIRS;
-}
-
 optional<BedType> Furniture::getBedType() const {
   return bedType;
 }

@@ -33,6 +33,10 @@ PItem Furnace::unqueue(int index) {
   return queued.removeIndexPreserveOrder(index).item;
 }
 
+void Furnace::changePriority(int firstIdx, int middleIdx, int lastIdx) {
+  moveBlock(queued, firstIdx, middleIdx, lastIdx);
+}
+
 bool Furnace::isIdle() const {
   return queued.empty();
 }

@@ -11,6 +11,16 @@
 SERIALIZE_DEF(Zones, positions, zones, quarters, quartersSectors)
 SERIALIZATION_CONSTRUCTOR_IMPL(Zones)
 
+template <typename T, typename Compare>
+vector<const T*> sortQuarters(const vector<T>& v, Compare cmp) {
+    vector<const T*> view;
+    view.reserve(v.size());
+    for (const auto& x : v) view.push_back(&x);
+    std::sort(view.begin(), view.end(),
+              [&](const T* a, const T* b){ return cmp(*a, *b); });
+    return view;
+}
+
 bool Zones::isZone(Position pos, ZoneId id) const {
   //PROFILE;
   if (auto z = zones.getReferenceMaybe(pos))
@@ -143,11 +153,30 @@ optional<Zones::QuartersInfo> Zones::getQuartersInfo(Position pos) const {
       optional<UniqueEntity<Creature>::Id> id;
       if (quarters.contains(make_pair(level, *sectorId)))
         id = quarters.get(make_pair(level, *sectorId));
-      return QuartersInfo {
-        id, getQuartersPositions(level, *sectorId)
-      };
+
+      return QuartersInfo { id, getQuartersPositions(level, *sectorId)};
     }
   }
+  return none;
+}
+
+optional<Zones::QuartersInfo> Zones::getQuartersInfoWithLuxury(Position pos) const {
+  auto level = pos.getLevel();
+  if (auto sectors = getReferenceMaybe(quartersSectors, level)) {
+    if (auto sectorId = sectors->getSector(pos.getCoord())) {
+      double luxury = 0.0;
+      const auto& quartPositions = getQuartersPositions(level, *sectorId);
+      for (const auto& p : quartPositions) {
+        luxury += p.getTotalLuxuryPlusWalls();
+      }
+      optional<UniqueEntity<Creature>::Id> id;
+      if (quarters.contains(make_pair(level, *sectorId)))
+        id = quarters.get(make_pair(level, *sectorId));
+
+      return QuartersInfo { id, quartPositions, luxury };
+    }
+  }
+
   return none;
 }
 
@@ -174,4 +203,58 @@ optional<UniqueEntity<Creature>::Id> Zones::getAssignedToQuarters(Position pos) 
   if (auto info = getQuartersInfo(pos))
     return info->id;
   return none;
+}
+
+vector<Zones::QuartersInfo> Zones::getAllQuarters(UniqueEntity<Creature>::Id crId) const {
+  auto& allQuartersPos = getPositions(ZoneId::QUARTERS);
+  optional<QuartersInfo> creaturesQuarters;       
+  vector<QuartersInfo> unassignedQuarters;
+  vector<QuartersInfo> assignedQuarters;
+  vector<QuartersInfo> zoneQrtsList;
+  for (const auto& pos : allQuartersPos) {
+    if (auto quartInfo = getQuartersInfoWithLuxury(pos)) {
+      const PositionSet* posSet = &quartInfo->positions;
+      bool found = false;
+      for (const auto& zQrts : zoneQrtsList) {
+        if (zQrts.positions == *posSet) {
+          found = true;
+          break;
+        }
+      }
+      if (found == false) {
+        zoneQrtsList.push_back(*quartInfo);
+
+        if (quartInfo->id){
+          if (*quartInfo->id != crId)
+            assignedQuarters.push_back(*quartInfo);
+          else
+            creaturesQuarters.emplace(*quartInfo);
+        }
+        else {
+          unassignedQuarters.push_back(*quartInfo);
+        }
+      }
+    }
+  }
+
+  auto sortingFunc = [](const QuartersInfo& a, const QuartersInfo& b) {
+    if (a.luxury != b.luxury) return a.luxury > b.luxury;       // desc by luxury
+    return a.positions.size() > b.positions.size();             // desc by size
+  };
+
+  auto viewUnassigned = sortQuarters(unassignedQuarters, sortingFunc);
+  auto viewAssigned = sortQuarters(assignedQuarters, sortingFunc);
+
+  vector<QuartersInfo> finalList;
+  finalList.reserve((creaturesQuarters ? 1 : 0)
+                   + viewUnassigned.size()
+                   + viewAssigned.size());
+
+  if (creaturesQuarters)
+    finalList.push_back(*creaturesQuarters);  
+
+  for (const QuartersInfo* p : viewUnassigned) finalList.push_back(*p);
+  for (const QuartersInfo* p : viewAssigned)   finalList.push_back(*p);
+
+  return finalList;
 }

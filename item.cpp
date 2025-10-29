@@ -734,8 +734,5 @@ void Item::getAttackMsg(const Creature* c, TString enemyName) const {
     case AttackMsg::PUNCH:
       biteMsg(TStringId("PUNCH"), TStringId("PUNCHES"));
       break;
-    case AttackMsg::PECK:
-      biteMsg(TStringId("PECK"), TStringId("PECKS"));
-      break;
   }
 }

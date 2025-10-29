@@ -914,19 +914,10 @@ class ByCollective : public Behaviour {
     return NoMove;
   }
 
-  int getEquipmentAutoAssignFreq() const {
-    int n = collective->getCreatures().size();
-    if (n < 10)
-      return 5;
-    if (n < 50)
-      return 10;
-    return 40;
-  }
-
   PTask getEquipmentTask() {
     if (!collective->usesEquipment(creature))
       return nullptr;
-    if (!collective->hasTrait(creature, MinionTrait::NO_AUTO_EQUIPMENT) && Random.roll(getEquipmentAutoAssignFreq()))
+    if (!collective->hasTrait(creature, MinionTrait::NO_AUTO_EQUIPMENT) && Random.roll(40))
       collective->autoAssignEquipment(creature);
     vector<PTask> tasks;
     auto& minionEquipment = collective->getMinionEquipment();

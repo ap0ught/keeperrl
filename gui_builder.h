@@ -302,6 +302,7 @@ class GuiBuilder {
   function<void(Rectangle)> getItemUpgradeCallback(const CollectiveInfo::QueuedItemInfo&);
   SGuiElem drawItemUpgradeButton(const CollectiveInfo::QueuedItemInfo&);
   function<void(Rectangle)> getItemCountCallback(const CollectiveInfo::QueuedItemInfo&);
+  vector<function<void()>> getPriorityCallbacks(const vector<CollectiveInfo::QueuedItemInfo>&, int);
   SGuiElem drawCreatureList(const vector<PlayerInfo>&, function<void(UniqueEntity<Creature>::Id)> button,
       int zoom = 2);
   SGuiElem drawScreenshotOverlay();

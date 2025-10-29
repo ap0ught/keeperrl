@@ -64,8 +64,7 @@ RICH_ENUM(
   CAN_DANCE,
   STEED,
   RIDER,
-  LOCKED_POSITION,
-  WITCH
+  LOCKED_POSITION
 );
 
 struct Color;
