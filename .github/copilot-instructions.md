@@ -46,7 +46,7 @@ make
 ### File Headers
 All source files must include the GPL v2 license header:
 ```cpp
-/* Copyright (C) 2013-2014 Michal Brzozowski (rusolis@poczta.fm)
+/* Copyright (C) 2013-2025 Michal Brzozowski (rusolis@poczta.fm)
 
    This file is part of KeeperRL.
 
