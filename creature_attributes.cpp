@@ -71,7 +71,7 @@ void CreatureAttributes::serializeImpl(Archive& ar, const unsigned int version) 
   ar(OPTION(boulder), OPTION(noChase), OPTION(isSpecial), OPTION(spellSchools), OPTION(spells));
   ar(SKIP(permanentEffects), OPTION(lastingEffects), OPTION(minionActivities), OPTION(expLevel), OPTION(inventory));
   ar(OPTION(noAttackSound), OPTION(maxLevelIncrease), NAMED(creatureId), NAMED(petReaction));
-  ar(OPTION(automatonParts), OPTION(specialAttr), NAMED(deathEffect), NAMED(chatEffect), OPTION(companions));
+  ar(OPTION(automatonParts), OPTION(specialAttr), NAMED(deathEffect), NAMED(chatEffect), NAMED(petEffect), OPTION(companions));
   ar(OPTION(maxPromotions), OPTION(afterKilledSomeone), SKIP(permanentBuffs), OPTION(killedAchievement));
   ar(OPTION(killedByAchievement), OPTION(steedAchievement), OPTION(fixedAttr), OPTION(grantsExperience), OPTION(hasQuarters));
   if (version >= 1)
@@ -252,6 +252,11 @@ optional<TString> CreatureAttributes::getPetReaction(const Creature* me) const {
   if (petReaction)
     return getVerbalReaction(*petReaction, me);
   return none;
+}
+
+void CreatureAttributes::applyPetEffect(Creature* me, Creature* other) {
+  if (petEffect)
+    petEffect->apply(other->getPosition(), me);
 }
 
 void CreatureAttributes::chatReaction(Creature* me, Creature* other) {
