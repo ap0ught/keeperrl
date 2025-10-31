@@ -221,7 +221,7 @@ vector<Zones::QuartersInfo> Zones::getAllQuarters(UniqueEntity<Creature>::Id crI
           break;
         }
       }
-      if (found == false) {
+      if (!found) {
         zoneQrtsList.push_back(*quartInfo);
 
         if (quartInfo->id){

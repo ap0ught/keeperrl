@@ -50,6 +50,10 @@ void Workshops::Type::queue(Collective* collective, int index, int requiredSkill
   updateState(collective);
 }
 
+// Changes the priority of queued items by moving a block within the queue.
+// firstIdx: starting index of the block to move
+// middleIdx: ending index (exclusive) of the block to move
+// lastIdx: target position where the block should be inserted
 void Workshops::Type::changePriority(Collective* collective, int firstIdx, int middleIdx, int lastIdx) {
   moveBlock(queued, firstIdx, middleIdx, lastIdx);
   updateState(collective);

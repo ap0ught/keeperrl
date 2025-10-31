@@ -1897,6 +1897,8 @@ void serialize(Archive& ar1, const unsigned int) { \
 template <typename T>
 void moveBlock(vector<T>& v, int firstIdx, int middleIdx, int lastIdx) {
   if (firstIdx < 0 || middleIdx < 0 || lastIdx < 0) return;
+  if (firstIdx >= v.size() || middleIdx > v.size() || lastIdx > v.size()) return;
+  if (firstIdx >= middleIdx || middleIdx > lastIdx) return;
 
   auto first  = v.begin() + firstIdx;        // start of the block
   auto middle = v.begin() + middleIdx;        // end of the block
