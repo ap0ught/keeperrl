@@ -285,6 +285,25 @@ Connections("map_swamp")
 { "hydra" "H" ColorId PURPLE }
 { "shelob" "S" ColorId PURPLE }
 { viewId = "witch" symbol = "@" color = ColorId BROWN weaponOrigin = {2 15} }
+{ viewId = "witch_boss1" symbol = "@" color = ColorId BROWN weaponOrigin = {2 15} }
+{ viewId = "witch_boss2" symbol = "@" color = ColorId BROWN weaponOrigin = {2 15} }
+{ viewId = "witch_boss3" symbol = "@" color = ColorId BROWN weaponOrigin = {2 15} }
+{ viewId = "witch_boss4" symbol = "@" color = ColorId BROWN weaponOrigin = {2 15} }
+{ viewId = "witch_boss5" symbol = "@" color = ColorId BROWN weaponOrigin = {2 15} }
+{ viewId = "witch_girl" symbol = "@" color = ColorId PINK }
+{ viewId = "night_hag" symbol = "H" color = ColorId BROWN }
+{ viewId = "strix" symbol = "H" color = ColorId PURPLE }
+{ viewId = "haunted_tree" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree2" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree3" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree4" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree5" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree6" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree7" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_tree8" symbol = "T" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_effigy" symbol = "X" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_effigy2" symbol = "X" color = ColorId BROWN roundShadow = true }
+{ viewId = "haunted_effigy3" symbol = "X" color = ColorId BROWN roundShadow = true }
 { viewId = "witchman" symbol = "@" color = ColorId WHITE weaponOrigin = {5 14} }
 { viewId = "knight" symbol = "@" color = ColorId LIGHT_GRAY weaponOrigin = {4 14} }
 { viewId = "jester" symbol = "@" color = ColorId PINK weaponOrigin = {3 18} }
@@ -313,6 +332,8 @@ Connections("map_swamp")
 { "archer" "@" ColorId BROWN }
 { "peasant" "@" ColorId GREEN }
 { "peasant_woman" "@" ColorId GREEN }
+{ "peasant_woman2" "@" ColorId GREEN }
+{ "peasant_woman3" "@" ColorId GREEN }
 { "prostitute" "@" ColorId PINK }
 { "gigolo" "@" ColorId PINK }
 { "child" "@" ColorId LIGHT_GREEN }
@@ -429,6 +450,7 @@ Connections("map_swamp")
 { "ant_soldier" "a" ColorId YELLOW }
 { "ant_queen" "a" ColorId PURPLE }
 { "snake" "S" ColorId YELLOW }
+{ "lizard" "L" ColorId LIGHT_GREEN }
 { "vulture" "v" ColorId DARK_GRAY }
 { "raven" "v" ColorId DARK_GRAY }
 { "body_part" "%" ColorId RED }
@@ -580,6 +602,8 @@ Connections("map_swamp")
 { viewId = "candelabrum_e" symbol = "*" color = ColorId ORANGE animated = true }
 { "sokoban_hole" "0" ColorId DARK_BLUE }
 { viewId = "cauldron" symbol = "ω" color = ColorId GREEN
+  isSymbolFont = true roundShadow = true }
+{ viewId = "cauldron_empty" symbol = "ω" color = ColorId GRAY
   isSymbolFont = true roundShadow = true }
 { viewId = "enchanted_cauldron" symbol = "ω" color = ColorId PURPLE
   isSymbolFont = true roundShadow = true }

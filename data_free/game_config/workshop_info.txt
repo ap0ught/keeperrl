@@ -67,3 +67,10 @@
   verb = WRITES_VERB
   attr = "DIVINITY"
 }
+
+"WITCH_LABORATORY" {
+  furniture = "WITCH_LABORATORY"
+  name = WORKSHOP_INFO_LABORATORY_NAME
+  verb = CONCOCTS_VERB
+  attr = "LABORATORY"
+}

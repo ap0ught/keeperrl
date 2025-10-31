@@ -418,5 +418,12 @@ End
   "LAVA_FORGE" inherit "FORGE" append {}
 }
 
+"witch_lab"
+{
+  "WITCH_LABORATORY"
+  {
+      {{Potion AddExperience 1}             2        "COOKED_CHILDREN" 1}
+  }
+}
 
 # Add more groups here, remember that you need to add your new group to your keeper in keeper_creatures.txt

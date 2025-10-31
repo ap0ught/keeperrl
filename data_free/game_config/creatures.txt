@@ -794,13 +794,93 @@ End
           LastingEffect INVISIBLE }} chance = 0.3 }
     }
   }
+"WITCH_PLAYER"
+  {
+    viewId = { "witch_boss1" }
+    viewIdUpgrades = { { "witch_boss2" } { "witch_boss3" } { "witch_boss4" } { "witch_boss5" } }
+    attr = {
+      DAMAGE 14
+      DEFENSE 14
+      SPELL_DAMAGE 20
+      LABORATORY 35
+    }
+    promotionGroup = "witch_adventurer"
+    body = {
+      type = Humanoid MEDIUM
+      droppedPartUpgrade = IncreaseAttr DEFENSE 2
+    }
+    name = {
+      name = CREATURE_ATTRIBUTES_WITCH_NAME
+      firstNameGen = "FIRST_FEMALE"
+      fullTitle = true
+    }
+    inventory = {
+      { "Knife"}
+    }
+    spells = { "healing" "pull" }
+    aiType = RANGED
+    gender = FEMALE
+    chatReactionFriendly = CREATURE_ATTRIBUTES_CURSES_HUMANS_CHATREACTION
+    chatReactionHostile = CREATURE_ATTRIBUTES_DIE_CHATREACTIONHOSTILE
+  }
+"NIGHT_HAG"
+  {
+    viewId = { "night_hag" }
+    attr = {
+      DAMAGE 35
+      DEFENSE 45
+    }
+    permanentEffects = {
+      RANGED_RESISTANCE 1
+    }
+    body = {
+      type = Humanoid LARGE
+      weight = 400
+      intrinsicAttacks = {
+        ARM {{{ Intrinsic { "claws_attack" } CLAWS_ATTACK 10 {
+            attackType = HIT attackMsg = CLAW } }}}
+      }
+    }
+    spells = { "healing" "pull" }
+    name = {
+      name = CREATURE_ATTRIBUTES_NIGHT_HAG_NAME
+    }
+  }
+"STRIX"
+  {
+    viewId = { "strix" }
+    attr = {
+      DAMAGE 13
+      DEFENSE 16
+    }
+    body = {
+      type = Bird MEDIUM
+      addBodyPart = {
+        WING 2
+      }
+      intrinsicAttacks = {
+        LEG {{{ Intrinsic { "claws_attack" } CLAWS_ATTACK 5 {
+            attackType = HIT attackMsg = CLAW } }}}
+      }
+    }
+    permanentEffects = {
+      SPEED 1
+    }
+    aiType = RANGED
+    gender = FEMALE
+    spells = { "healing" }
+    name = {
+      name = CREATURE_ATTRIBUTES_STRIX_NAME
+    }
+  }
+
 "WITCHMAN"
   {
     viewId = { "witchman" }
     attr = {
       DAMAGE 30
       DEFENSE 30
-      SPELL_DAMAGE 20 
+      SPELL_DAMAGE 20
     }
     body = {
       type = Humanoid LARGE
@@ -1863,6 +1943,10 @@ End
 "PESEANT_F" inherit "PESEANT"
   {
     viewId = { "peasant_woman" }
+    genderAlternatives = {
+      FEMALE { "peasant_woman2" }
+      FEMALE { "peasant_woman3" }
+    }
     name = {
       name = CREATURE_ATTRIBUTES_PESEANT_F_NAME
     }
@@ -2290,7 +2374,7 @@ End
     name = {
       name = CREATURE_ATTRIBUTES_CHILD_NAME
     }
-    hatedByEffect = HATE_HUMANS
+    hatedByEffect = HATE_CHILDREN
     noCopulation = true
   }
 "CHILD_ENTS" inherit "CHILD"
@@ -2334,7 +2418,7 @@ End
     name = {
       name = CREATURE_ATTRIBUTES_CHILD_NAME
     }
-    hatedByEffect = HATE_HUMANS
+    hatedByEffect = HATE_CHILDREN
   }
 "HALLOWEEN_KID"
   {
@@ -2351,7 +2435,7 @@ End
     name = {
       name = CREATURE_ATTRIBUTES_CHILD_NAME
     }
-    hatedByEffect = HATE_HUMANS
+    hatedByEffect = HATE_CHILDREN
     inventory = {
       { "BagOfCandies"}
       { "HalloweenCostume"}
@@ -3410,7 +3494,7 @@ End
     name = {
       name = CREATURE_ATTRIBUTES_ELF_CHILD_NAME
     }
-    hatedByEffect = HATE_ELVES
+    hatedByEffect = HATE_CHILDREN
     noCopulation = true
   }
 "ELF_LORD"
@@ -3543,7 +3627,7 @@ End
     name = {
       name = CREATURE_ATTRIBUTES_DARK_ELF_CHILD_NAME
     }
-    hatedByEffect = HATE_ELVES
+    hatedByEffect = HATE_CHILDREN
     noCopulation = true
   }
 "DARK_ELF_LORD"
@@ -3904,7 +3988,7 @@ End
     viewId = { "rat" }
     attr = {
       DAMAGE 2
-      DEFENSE 2 
+      DEFENSE 2
     }
     body = {
       type = FourLegged SMALL
@@ -3916,6 +4000,7 @@ End
       SPEED 1
       STEED 1
     }
+    canJoinCollective = false
     noChase = true
     name = {
       name = CREATURE_ATTRIBUTES_RAT_NAME
@@ -3950,9 +4035,10 @@ End
         TORSO {{{ Intrinsic { "bite_attack" } FANGS_ATTACK 1 {
             attackType = BITE
             attackMsg = BITE
-            victimEffect = {0.1 Lasting POISON} } }}}
+            victimEffect = {0.1 Lasting 5 POISON} } }}}
       }
     }
+    canJoinCollective = false
     name = {
       name = CREATURE_ATTRIBUTES_SPIDER_NAME
     }
@@ -4083,6 +4169,7 @@ End
             victimEffect = {0.3 Lasting POISON} } }}}
       }
     }
+    canJoinCollective = false
     permanentEffects = {
       SWIMMING_SKILL 1
     }
@@ -4113,6 +4200,36 @@ End
     name = {
       name = CREATURE_ATTRIBUTES_RAVEN_NAME
       groupName = CREATURE_ATTRIBUTES_RAVEN_GROUPNAME
+    }
+  }
+"GIANT_LIZARD"
+  {
+    viewId = { "lizard" }
+    attr = {
+      DAMAGE 34
+      DEFENSE 34
+    }
+    body = {
+      type = NonHumanoid MEDIUM
+      weight = 200
+      bodyParts = {
+        HEAD 1
+        TORSO 1
+      }
+      deathSound = none
+      intrinsicAttacks = {
+        HEAD {{{ Intrinsic { "bite_attack" } FANGS_ATTACK 1 {
+            attackType = BITE
+            attackMsg = BITE
+            victimEffect = {0.3 Lasting POISON} } }}}
+      }
+    }
+    canJoinCollective = false
+    permanentEffects = {
+      SWIMMING_SKILL 1
+    }
+    name = {
+      name = CREATURE_ATTRIBUTES_LIZARD_NAME
     }
   }
 "VULTURE"

@@ -303,7 +303,7 @@ End
       specialTraits = {
          { 0.01 { ExtraIntrinsicAttack
             HEAD
-            { Intrinsic { "bite_attack" } FANGS 5 {
+            { Intrinsic { "bite_attack" } FANGS_ATTACK 5 {
                 attackType = BITE
                 attackMsg = BITE
                 victimEffect = {0.1 Lasting POISON} } } } }
@@ -417,9 +417,9 @@ End
       }
       specialTraits = {
          { 0.03 { CompanionInfo { summonFreq = 0.1 creatures = { "FLY" }}}}
-         { 0.2 { ExtraIntrinsicAttack
+         { 1.0 { ExtraIntrinsicAttack
             HEAD
-            { Intrinsic { "bite_attack" } FANGS 5 {
+            { Intrinsic { "bite_attack" } FANGS_ATTACK 5 {
                 attackType = BITE
                 attackMsg = BITE
                 victimEffect = {0.1 Lasting POISON} } } } }
@@ -780,7 +780,7 @@ End
          { 0.03 { CompanionInfo { summonFreq = 0.1 creatures = { "FLY" }}}}
          { 0.2 { ExtraIntrinsicAttack
             HEAD
-            { Intrinsic { "bite_attack" } FANGS 5 {
+            { Intrinsic { "bite_attack" } FANGS_ATTACK 5 {
                 attackType = BITE
                 attackMsg = BITE
                 victimEffect = {0.1 Lasting POISON} } } } }
@@ -832,7 +832,7 @@ End
       specialTraits = {
          { 0.01 { ExtraIntrinsicAttack
             HEAD
-            { Intrinsic { "bite_attack" } FANGS 5 {
+            { Intrinsic { "bite_attack" } FANGS_ATTACK 5 {
                 attackType = BITE
                 attackMsg = BITE
                 victimEffect = {0.1 Lasting POISON} } } } }
@@ -863,7 +863,7 @@ End
       specialTraits = {
          { 0.01 { ExtraIntrinsicAttack
             HEAD
-            { Intrinsic { "bite_attack" } FANGS 5 {
+            { Intrinsic { "bite_attack" } FANGS_ATTACK 5 {
                 attackType = BITE
                 attackMsg = BITE
                 victimEffect = {0.1 Lasting POISON} } } } }
