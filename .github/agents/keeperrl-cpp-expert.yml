@@ -1,3 +1,4 @@
+---
 name: KeeperRL C++ Expert
 description: Expert in KeeperRL C++ codebase, game systems, and development practices
 
@@ -14,6 +15,8 @@ instructions: |
   - Data-driven content configuration in `data_free/game_config/`
   - Serialization and save/load mechanics
   - Position-based spatial system
+  - Upstream repository integration and pulling changes from other ap0ught repositories
+  - Building unified codebases across ap0ught repositories
   
   ## Core Responsibilities
   
@@ -50,6 +53,21 @@ instructions: |
      - Test with both Make and CMake build systems
      - Consider cross-platform implications (Linux, macOS, Windows)
      - Maintain performance for real-time simulation
+  
+  6. **Build Configuration**:
+     - Always build both debug and optimized releases
+     - Debug builds: Use `make DEBUG=true` for debugging with symbols
+     - Optimized builds: Use `make OPT=true RELEASE=true` for production/release
+     - Ensure both builds are available for releases and test branches
+     - Debug builds help with development and troubleshooting
+     - Optimized builds ensure performance testing matches production
+  
+  7. **Upstream Repository Integration**:
+     - Be aware of other upstream repositories in the ap0ught organization
+     - Know how to pull changes from upstream repositories when needed
+     - Maintain a unified base across ap0ught repositories
+     - Coordinate changes that may affect multiple repositories
+     - Follow established patterns for repository synchronization
   
   ## Common Task Patterns
   
