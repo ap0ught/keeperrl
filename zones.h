@@ -40,9 +40,18 @@ class Zones {
   struct QuartersInfo {
     optional<UniqueEntity<Creature>::Id> id;
     const PositionSet& positions;
+    double luxury = 0.0;
+    bool operator==(const QuartersInfo& other) const {
+      if (id && other.id)
+        return id == other.id; // compare unique identifier
+      else
+        return positions == other.positions;
+    }
   };
   optional<QuartersInfo> getQuartersInfo(Position) const;
+  optional<QuartersInfo> getQuartersInfoWithLuxury(Position) const;
   optional<UniqueEntity<Creature>::Id> getAssignedToQuarters(Position) const;
+  vector<QuartersInfo> getAllQuarters(UniqueEntity<Creature>::Id crId) const;
 
   SERIALIZATION_DECL(Zones)
 

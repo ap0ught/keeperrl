@@ -117,8 +117,6 @@ void Task::setDone() {
   done = true;
 }
 
-namespace {
-
 class Construction : public Task {
   public:
   Construction(WTaskCallback c, Position pos, FurnitureType type) : Task(true), furnitureType(type), position(pos),
@@ -161,13 +159,10 @@ class Construction : public Task {
   WTaskCallback SERIAL(callback) = nullptr;
 };
 
-}
-
 PTask Task::construction(WTaskCallback c, Position target, FurnitureType type) {
   return makeOwner<Construction>(c, target, type);
 }
 
-namespace {
 class Destruction : public Task {
   public:
   Destruction(WTaskCallback c, Position pos, const Furniture* furniture, DestroyAction action, PositionMatching* m)
@@ -248,13 +243,9 @@ class Destruction : public Task {
   PositionMatching* SERIAL(matching) = nullptr;
 };
 
-}
-
 PTask Task::destruction(WTaskCallback c, Position target, const Furniture* furniture, DestroyAction destroyAction, PositionMatching* matching) {
   return makeOwner<Destruction>(c, target, furniture, destroyAction, matching);
 }
-
-namespace {
 
 class EquipItem : public Task {
   public:
@@ -282,8 +273,6 @@ class EquipItem : public Task {
   UniqueEntity<Item>::Id SERIAL(item);
   TString SERIAL(itemName);
 };
-
-}
 
 PTask Task::pickAndEquipItem(Position position, Item* item) {
   return chain(pickUpItem(position, {item}), equipItem(item));
@@ -318,7 +307,6 @@ static optional<Position> chooseRandomClose(const Creature* c, const PositionCon
     return none;
 }
 
-namespace {
 class GoToAnd : public Task {
   public:
   GoToAnd(vector<Position> targets, PTask task) : targets(targets), task(std::move(task)) {}
@@ -364,7 +352,6 @@ class GoToAnd : public Task {
   vector<Position> SERIAL(targets);
   PTask SERIAL(task);
 };
-}
 
 class ApplySquare : public Task {
   public:
@@ -471,8 +458,6 @@ PTask Task::applySquare(WTaskCallback c, vector<pair<Position, FurnitureLayer>> 
   return makeOwner<ApplySquare>(c, position, searchType, actionType);
 }
 
-namespace {
-
 class ArcheryRange : public Task {
   public:
   ArcheryRange(WTaskCallback c, vector<Position> pos) : callback(c), targets(pos) {}
@@ -553,13 +538,11 @@ class ArcheryRange : public Task {
   }
 };
 
-}
 
 PTask Task::archeryRange(WTaskCallback c, vector<Position> positions) {
   return makeOwner<ArcheryRange>(c, positions);
 }
 
-namespace {
 
 class Kill : public Task {
   public:
@@ -606,7 +589,7 @@ class Kill : public Task {
   Type SERIAL(type);
 };
 
-}
+
 
 PTask Task::kill(Creature* creature) {
   return makeOwner<Kill>(creature, Kill::ATTACK);
@@ -620,7 +603,7 @@ PTask Task::disassemble(Creature* creature) {
   return makeOwner<Kill>(creature, Kill::DISASSEMBLE);
 }
 
-namespace {
+
 
 class Disappear : public Task {
   public:
@@ -637,13 +620,11 @@ class Disappear : public Task {
   SERIALIZE_ALL(SUBCLASS(Task))
 };
 
-}
 
 PTask Task::disappear() {
   return makeOwner<Disappear>();
 }
 
-namespace {
 
 class Chain : public Task {
   public:
@@ -699,8 +680,6 @@ class Chain : public Task {
   int SERIAL(current) = 0;
 };
 
-}
-
 PTask Task::chain(PTask t1, PTask t2) {
   return makeOwner<Chain>(makeVec(std::move(t1), std::move(t2)));
 }
@@ -713,7 +692,7 @@ PTask Task::chain(vector<PTask> v) {
   return makeOwner<Chain>(std::move(v));
 }
 
-namespace {
+
 
 class Explore : public Task {
   public:
@@ -743,13 +722,12 @@ class Explore : public Task {
   Position SERIAL(position);
 };
 
-}
+
 
 PTask Task::explore(Position pos) {
   return makeOwner<Explore>(pos);
 }
 
-namespace {
 
 class AbuseMinion : public Task {
   public:
@@ -784,13 +762,13 @@ class AbuseMinion : public Task {
   WeakPointer<Creature> SERIAL(target);
 };
 
-}
+
 
 PTask Task::abuseMinion(Collective* col, Creature* c) {
   return makeOwner<AbuseMinion>(col, c);
 }
 
-namespace {
+
 
 class AttackCreatures : public Task {
   public:
@@ -822,7 +800,7 @@ class AttackCreatures : public Task {
   vector<WeakPointer<Creature>> SERIAL(creatures);
 };
 
-}
+
 
 PTask Task::attackCreatures(vector<Creature*> c) {
   return makeOwner<AttackCreatures>(std::move(c));
@@ -844,7 +822,7 @@ PTask Task::stealFrom(Collective* collective, CollectiveResourceId id) {
     return PTask(nullptr);
 }
 
-namespace {
+
 
 class CampAndSpawnTask : public Task {
   public:
@@ -911,13 +889,13 @@ class CampAndSpawnTask : public Task {
 };
 
 
-}
+
 
 PTask Task::campAndSpawn(Collective* target, const CreatureList& spawns, int numAttacks) {
   return makeOwner<CampAndSpawnTask>(target, spawns, numAttacks);
 }
 
-namespace {
+
 
 class KillFighters : public Task {
   public:
@@ -960,13 +938,13 @@ class KillFighters : public Task {
   EntitySet<Creature> SERIAL(targets);
 };
 
-}
+
 
 PTask Task::killFighters(Collective* col, int numCreatures) {
   return makeOwner<KillFighters>(col, numCreatures);
 }
 
-namespace {
+
 class ConsumeItem : public Task {
   public:
   ConsumeItem(WTaskCallback c, vector<Item*> _items) : items(_items), callback(c) {}
@@ -987,13 +965,13 @@ class ConsumeItem : public Task {
   EntitySet<Item> SERIAL(items);
   WTaskCallback SERIAL(callback) = nullptr;
 };
-}
+
 
 PTask Task::consumeItem(WTaskCallback c, vector<Item*> items) {
   return makeOwner<ConsumeItem>(c, items);
 }
 
-namespace {
+
 class Copulate : public Task {
   public:
   Copulate(WTaskCallback c, Creature* t, int turns) : target(t), callback(c), numTurns(turns) {}
@@ -1033,13 +1011,13 @@ class Copulate : public Task {
   WTaskCallback SERIAL(callback) = nullptr;
   int SERIAL(numTurns);
 };
-}
+
 
 PTask Task::copulate(WTaskCallback c, Creature* target, int numTurns) {
   return makeOwner<Copulate>(c, target, numTurns);
 }
 
-namespace {
+
 class Consume : public Task {
   public:
   Consume(Creature* t) : target(t) {}
@@ -1070,13 +1048,13 @@ class Consume : public Task {
   protected:
   WeakPointer<Creature> SERIAL(target);
 };
-}
+
 
 PTask Task::consume(Creature* target) {
   return makeOwner<Consume>(target);
 }
 
-namespace {
+
 
 class Eat : public Task {
   public:
@@ -1150,13 +1128,13 @@ class Eat : public Task {
   PositionSet SERIAL(rejectedPosition);
 };
 
-}
+
 
 PTask Task::eat(vector<Position> hatcherySquares) {
   return makeOwner<Eat>(hatcherySquares);
 }
 
-namespace {
+
 class GoTo : public Task {
   public:
   GoTo(Position pos, bool forever) : target(pos), tryForever(forever) {}
@@ -1190,7 +1168,7 @@ class GoTo : public Task {
   Position SERIAL(target);
   bool SERIAL(tryForever);
 };
-}
+
 
 PTask Task::goTo(Position pos) {
   return makeOwner<GoTo>(pos, false);
@@ -1200,7 +1178,7 @@ PTask Task::goToTryForever(Position pos) {
   return makeOwner<GoTo>(pos, true);
 }
 
-namespace {
+
 class Dance : public Task {
   public:
   Dance(Collective* col) : collective(col) {}
@@ -1227,13 +1205,13 @@ class Dance : public Task {
   protected:
   Collective* SERIAL(collective);
 };
-}
+
 
 PTask Task::dance(Collective* col) {
   return makeOwner<Dance>(col);
 }
 
-namespace {
+
 class StayIn : public Task {
   public:
   StayIn(vector<Position> pos) : target(std::move(pos)) {}
@@ -1277,14 +1255,14 @@ class StayIn : public Task {
   vector<Position> SERIAL(target);
   optional<Position> SERIAL(currentTarget);
 };
-}
+
 
 PTask Task::stayIn(vector<Position> pos) {
   CHECK(!pos.empty());
   return makeOwner<StayIn>(pos);
 }
 
-namespace {
+
 class Idle : public Task {
   public:
 
@@ -1300,13 +1278,13 @@ class Idle : public Task {
   SERIALIZE_ALL(SUBCLASS(Task))
   SERIALIZATION_CONSTRUCTOR(Idle);
 };
-}
+
 
 PTask Task::idle() {
   return makeOwner<Idle>();
 }
 
-namespace {
+
 class ActivitySuccess : public Task {
   public:
 
@@ -1324,13 +1302,12 @@ class ActivitySuccess : public Task {
   SERIALIZATION_CONSTRUCTOR(ActivitySuccess);
 };
 
-}
+
 
 PTask Task::activitySuccess() {
   return makeOwner<ActivitySuccess>();
 }
 
-namespace {
 class AlwaysDone : public Task {
   public:
   AlwaysDone(PTask t, PTaskPredicate predicate) : task(std::move(t)),
@@ -1373,7 +1350,7 @@ class AlwaysDone : public Task {
   PTask SERIAL(task);
   PTaskPredicate SERIAL(donePredicate);
 };
-}
+
 
 PTask Task::alwaysDone(PTask t) {
   return doneWhen(std::move(t), TaskPredicate::always());
@@ -1383,7 +1360,7 @@ PTask Task::doneWhen(PTask task, PTaskPredicate predicate) {
   return makeOwner<AlwaysDone>(std::move(task), std::move(predicate));
 }
 
-namespace {
+
 class Follow : public Task {
   public:
   Follow(Creature* t) : target(t) {}
@@ -1413,13 +1390,13 @@ class Follow : public Task {
   SERIALIZE_ALL(SUBCLASS(Task), target)
   SERIALIZATION_CONSTRUCTOR(Follow)
 };
-}
+
 
 PTask Task::follow(Creature* c) {
   return makeOwner<Follow>(c);
 }
 
-namespace {
+
 class TransferTo : public Task {
   public:
   TransferTo(Model* m) : model(m) {}
@@ -1453,13 +1430,13 @@ class TransferTo : public Task {
   optional<Position> SERIAL(target);
   Model* SERIAL(model) = nullptr;
 };
-}
+
 
 PTask Task::transferTo(Model* m) {
   return makeOwner<TransferTo>(m);
 }
 
-namespace {
+
 class GoToAndWait : public Task {
   public:
   GoToAndWait(Position pos, TimeInterval waitT) : position(pos), waitTime(waitT) {}
@@ -1515,13 +1492,12 @@ class GoToAndWait : public Task {
   optional<LocalTime> SERIAL(maxTime);
   optional<LocalTime> SERIAL(timeout);
 };
-}
+
 
 PTask Task::goToAndWait(Position pos, TimeInterval waitTime) {
   return makeOwner<GoToAndWait>(pos, waitTime);
 }
 
-namespace {
 class WaitTask : public Task {
   public:
   WaitTask(TimeInterval waitT) : waitTime(waitT) {}
@@ -1547,13 +1523,13 @@ class WaitTask : public Task {
   TimeInterval SERIAL(waitTime);
   optional<LocalTime> SERIAL(maxTime);
 };
-}
+
 
 PTask Task::wait(TimeInterval waitTime) {
   return makeOwner<WaitTask>(waitTime);
 }
 
-namespace {
+
 class Whipping : public Task {
   public:
   Whipping(Position pos, Creature* w) : position(pos), whipped(w) {}
@@ -1584,13 +1560,13 @@ class Whipping : public Task {
   Position SERIAL(position);
   WeakPointer<Creature> SERIAL(whipped);
 };
-}
+
 
 PTask Task::whipping(Position pos, Creature* whipped) {
   return makeOwner<Whipping>(pos, whipped);
 }
 
-namespace {
+
 class DropItemsAnywhere : public Task {
   public:
   DropItemsAnywhere(EntitySet<Item> it) : items(it) {}
@@ -1609,13 +1585,13 @@ class DropItemsAnywhere : public Task {
   protected:
   EntitySet<Item> SERIAL(items);
 };
-}
+
 
 PTask Task::dropItemsAnywhere(vector<Item*> items) {
   return makeOwner<DropItemsAnywhere>(items);
 }
 
-namespace {
+
 class DropItems : public Task {
   public:
   DropItems(EntitySet<Item> items, StorageId storage, Collective* collective, optional<Position> origin)
@@ -1699,7 +1675,7 @@ class DropItems : public Task {
   optional<Position> SERIAL(origin);
   WeakPointer<Creature> SERIAL(pickedUpCreature);
 };
-}
+
 
 PTask Task::dropItems(vector<Item*> items, StorageId storage, Collective* collective) {
   return makeOwner<DropItems>(items, storage, collective, none);
@@ -1709,7 +1685,7 @@ PTask Task::dropItems(vector<Item*> items, vector<Position> positions) {
   return makeOwner<DropItems>(items, std::move(positions));
 }
 
-namespace {
+
 
 class PickUpItem : public Task {
   public:
@@ -1798,7 +1774,7 @@ class PickUpItem : public Task {
   optional<StorageId> SERIAL(storage);
   WeakPointer<DropItems> SERIAL(dropTask);
 };
-}
+
 
 PTask Task::pickUpItem(Position position, vector<Item*> items, optional<StorageId> storage) {
   return makeOwner<PickUpItem>(position, items, storage, nullptr);
@@ -1810,7 +1786,7 @@ Task::PickUpAndDrop Task::pickUpAndDrop(Position origin, vector<Item*> items, St
   return PickUpAndDrop { std::move(pickUp), std::move(drop)};
 }
 
-namespace {
+
 class Spider : public Task {
   public:
   Spider(Position orig, const vector<Position>& pos)
@@ -1848,13 +1824,13 @@ class Spider : public Task {
   vector<Position> SERIAL(webPositions);
   optional<Position> SERIAL(attackPosition);
 };
-}
+
 
 PTask Task::spider(Position origin, const vector<Position>& posClose) {
   return makeOwner<Spider>(origin, posClose);
 }
 
-namespace {
+
 class WithTeam : public Task {
   public:
   WithTeam(Collective* col, TeamId teamId, PTask task)
@@ -1894,13 +1870,13 @@ class WithTeam : public Task {
   TeamId SERIAL(teamId);
   PTask SERIAL(task);
 };
-}
+
 
 PTask Task::withTeam(Collective* col, TeamId teamId, PTask task) {
   return makeOwner<WithTeam>(std::move(col), teamId, std::move(task));
 }
 
-namespace {
+
 
 static PositionSet getExtendedTerritorySet(Collective* col) {
   auto area = col->getTerritory().getExtended(10);
@@ -1934,13 +1910,13 @@ class AllianceTask : public Task {
   PositionSet SERIAL(targetArea);
   PTask SERIAL(task);
 };
-}
+
 
 PTask Task::allianceAttack(vector<Collective*> allies, Collective* enemy, PTask task) {
   return makeOwner<AllianceTask>(std::move(allies), enemy, std::move(task));
 }
 
-namespace {
+
 class DuelTask : public Task {
   public:
   DuelTask(Collective* target, Collective* attacker, vector<Creature*> team, PTask attackTask,
@@ -2023,14 +1999,14 @@ class DuelTask : public Task {
   PositionSet SERIAL(targetArea);
   optional<GlobalTime> SERIAL(maxShowTime);
 };
-}
+
 
 PTask Task::duelTask(Collective* target, Collective* attacker, vector<Creature*> team, PTask attackTask,
     shared_ptr<DuelState> duelState) {
   return makeOwner<DuelTask>(target, attacker, std::move(team), std::move(attackTask), std::move(duelState));
 }
 
-namespace {
+
 class OutsidePredicate : public TaskPredicate {
   public:
   OutsidePredicate(Creature* c, PositionSet pos) : creature(c), positions(pos) {}
@@ -2046,7 +2022,7 @@ class OutsidePredicate : public TaskPredicate {
   Creature* SERIAL(creature) = nullptr;
   PositionSet SERIAL(positions);
 };
-}
+
 
 TaskPredicate::~TaskPredicate() {}
 
@@ -2054,7 +2030,7 @@ PTaskPredicate TaskPredicate::outsidePositions(Creature* c, PositionSet pos) {
   return makeOwner<OutsidePredicate>(c, std::move(pos));
 }
 
-namespace {
+
 class AlwaysPredicate : public TaskPredicate {
   public:
   AlwaysPredicate() {}
@@ -2065,7 +2041,7 @@ class AlwaysPredicate : public TaskPredicate {
 
   SERIALIZE_ALL(SUBCLASS(TaskPredicate))
 };
-}
+
 
 PTaskPredicate TaskPredicate::always() {
   return makeOwner<AlwaysPredicate>();

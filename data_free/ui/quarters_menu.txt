@@ -1,0 +1,59 @@
+Def QuartersWindow()
+  Width 600 MiniWindow({
+    Using "EXIT" Button(true)
+    Scrolling(Vertical {
+
+      Horizontal {
+        Using "title" Label()
+        Stretch {}
+        Using "currentLuxText" Label()
+        {
+          Using "currentLuxury" Label(color = ColorId GREEN)
+          If "currInsuffLux" Using "currentLuxury" Label(color = ColorId YELLOW) 
+        }
+      }
+
+      Height 10 {}
+
+      Position(MIDDLE_STRETCHED_X, Horizontal {
+        Using "quarters_header" Label()
+        Stretch {}
+        Using "owner_header"  Label()
+      })
+
+      Height 6 {}
+
+      Using "elems" List(VERTICAL,
+        Height 30 {
+          Using "callback" Focusable NewHighlight()
+          Using "callback" ButtonDual()
+          Position(MIDDLE_STRETCHED_X, Horizontal {
+            Width 120
+            {
+              Using "luxury" Label(color = ColorId GREEN) 
+              If "insuffLuxury" Using "luxury" Label(color = ColorId YELLOW)                        
+            }
+            Stretch {}
+            Using "level" Label()
+            Stretch {}
+            Width 10 {}
+            Using "current" Label(color = ColorId GREEN)
+            Width 10 {}            
+            {              
+              Using "owner" Label()
+              If "thisOwner" Using "owner" Label(color = ColorId GREEN)
+            }
+            Using "view_id" ViewId()          
+          })
+        }
+      )
+    })
+  })
+End
+
+{
+  ExitButtons()
+  FocusKeysVertical()
+  Position(SCREEN, Fill(Rgb 0 0 0 150))
+  Position(SCREEN, Position(TOP_CENTERED, MarginLeft(330, MarginTop(210, QuartersWindow())), true))
+}

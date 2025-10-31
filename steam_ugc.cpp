@@ -71,12 +71,12 @@ UGC::UGC(ISteamUGC* ptr) : ptr(ptr) {
 UGC::~UGC() = default;
 
 int UGC::numSubscribedItems() const {
-  return (int)FUNC(GetNumSubscribedItems)(ptr);
+  return (int)FUNC(GetNumSubscribedItems)(ptr, true);
 }
 
 vector<ItemId> UGC::subscribedItems() const {
   vector<ItemId> out(numSubscribedItems(), ItemId(0));
-  int numItems = FUNC(GetSubscribedItems)(ptr, (PublishedFileId_t*)out.data(), out.size());
+  int numItems = FUNC(GetSubscribedItems)(ptr, (PublishedFileId_t*)out.data(), out.size(), true);
   while(out.size() > numItems)
     out.pop_back();
   return out;
@@ -332,7 +332,7 @@ void UGC::beginUpdateItem(const UpdateItemInfo& info) {
       SteamParamStringArray_t strings;
       strings.m_nNumStrings = buffer.size();
       strings.m_ppStrings = buffer.data();
-      auto ret = SteamAPI_ISteamUGC_SetItemTags(ptr, handle, &strings);
+      auto ret = SteamAPI_ISteamUGC_SetItemTags(ptr, handle, &strings, true);
       CHECK(ret);
     }
 

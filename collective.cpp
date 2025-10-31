@@ -605,6 +605,10 @@ bool Collective::minionCanUseQuarters(Creature* c) {
   return hasTrait(c, MinionTrait::FIGHTER) || hasTrait(c, MinionTrait::LEADER);
 }
 
+bool Collective::minionHasQuarters(UniqueEntity<Creature>::Id id) {
+  return !getZones().getQuarters(id).empty();
+}
+
 void Collective::updateMinionPromotions() {
   if (!config->minionsRequireQuarters())
     return;
@@ -1822,6 +1826,19 @@ void Collective::setZone(Position pos, ZoneId id) {
 }
 
 void Collective::eraseZone(Position pos, ZoneId id) {
+  if (id == ZoneId::QUARTERS) {
+    auto quarters = zones->getQuartersInfo(pos);
+    if (quarters->id) {
+      auto matches = creatures.filter([&](Creature* c){
+        return c && c->getUniqueId() == quarters->id;
+      });
+
+      if (!matches.empty()) {
+        Creature* found = matches.front();
+        found->getAttributes().setHasQuarters(false);
+      }
+    }
+  }
   zones->eraseZone(pos, id);
   if (auto storageId = getZoneStorage(id)) {
     constructions->getStoragePositions(*storageId).remove(pos);
@@ -1830,7 +1847,21 @@ void Collective::eraseZone(Position pos, ZoneId id) {
 }
 
 void Collective::assignQuarters(Creature* c, Position pos) {
+  auto quarters = zones->getQuartersInfo(pos);    
   zones->assignQuarters(c->getUniqueId(), pos);
+  c->getAttributes().setHasQuarters(true);
+
+  if (quarters->id) {
+      auto matches = creatures.filter([&](Creature* c){
+        return c && c->getUniqueId() == quarters->id;
+      });
+
+      if (!matches.empty()) {
+        Creature* found = matches.front();
+        if (found->getUniqueId() != c->getUniqueId())
+          found->getAttributes().setHasQuarters(false);
+      }
+  }
 }
 
 const TaskMap& Collective::getTaskMap() const {

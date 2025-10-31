@@ -19,6 +19,7 @@ class Furnace {
   PItem unqueue(int index);
   bool isIdle() const;
   CostInfo getRecycledAmount(const Item*) const;
+  void changePriority(int firstIdx, int middleIdx, int lastIdx);
 
   SERIALIZATION_DECL(Furnace)
 

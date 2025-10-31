@@ -73,7 +73,7 @@ void CreatureAttributes::serializeImpl(Archive& ar, const unsigned int version) 
   ar(OPTION(noAttackSound), OPTION(maxLevelIncrease), NAMED(creatureId), NAMED(petReaction));
   ar(OPTION(automatonParts), OPTION(specialAttr), NAMED(deathEffect), NAMED(chatEffect), OPTION(companions));
   ar(OPTION(maxPromotions), OPTION(afterKilledSomeone), SKIP(permanentBuffs), OPTION(killedAchievement));
-  ar(OPTION(killedByAchievement), OPTION(steedAchievement), OPTION(fixedAttr), OPTION(grantsExperience));
+  ar(OPTION(killedByAchievement), OPTION(steedAchievement), OPTION(fixedAttr), OPTION(grantsExperience), OPTION(hasQuarters));
   if (version >= 1)
     ar(OPTION(noCopulation));
   if (version >= 2) {
@@ -129,6 +129,14 @@ void CreatureAttributes::setAIType(AIType type) {
 
 AIType CreatureAttributes::getAIType() const {
   return aiType;
+}
+
+void CreatureAttributes::setHasQuarters(bool quarters) {
+  hasQuarters = quarters;
+}
+
+bool CreatureAttributes::getHasQuarters() const {
+  return hasQuarters;
 }
 
 const TString& CreatureAttributes::getDeathDescription(const ContentFactory* factory) const {
