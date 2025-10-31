@@ -182,6 +182,7 @@ PlayerInfo::PlayerInfo(const Creature* c, const ContentFactory* contentFactory)
   positionHash = c->getPosition().getHash();
   creatureId = c->getUniqueId();
   attributes = AttributeInfo::fromCreature(contentFactory, c);
+  hasQuarters = c->hasQuarters();
   experienceInfo = getCreatureExperienceInfo(contentFactory, c);
   for (auto& id : c->getAttributes().getSpellSchools())
     spellSchools.push_back(fillSpellSchool(c, id, contentFactory));

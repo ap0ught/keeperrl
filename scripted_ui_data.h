@@ -19,6 +19,7 @@ namespace ScriptedUIDataElems {
 using Label = TString;
 struct Callback {
   function<bool()> fun;
+  optional<function<bool()>> altFun;
   template <class Archive> void serialize(Archive& ar1, const unsigned int) {
     FATAL << "Can't deserialize Callback";
   }

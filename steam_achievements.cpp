@@ -8,7 +8,7 @@ SteamAchievements::SteamAchievements() {
   if (auto stats = SteamUserStats())
     if (auto user = SteamUser())
       if (user->BLoggedOn()) {
-        stats->RequestCurrentStats();
+        //stats->RequestCurrentStats();  // had to disable, truncated
       }
 }
 

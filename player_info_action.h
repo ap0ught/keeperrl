@@ -8,5 +8,6 @@ enum class PlayerInfoAction {
   CONSUME,
   LOCATE,
   ASSIGN_EQUIPMENT,
-  LOCK_POSITION
+  LOCK_POSITION,
+  QUARTERS
 };

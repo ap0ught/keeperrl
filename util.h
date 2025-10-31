@@ -1136,6 +1136,21 @@ bool contains(const initializer_list<T>& v, const V& elem) {
   return std::find(v.begin(), v.end(), elem) != v.end();
 }
 
+template <typename Container, typename Key>
+bool contains(const Container& c, const Key& key) {
+    return c.find(key) != c.end();
+}
+
+template <typename T, typename Value>
+bool contains(const vector<T>& c, const Value& value) {
+    return std::find(c.begin(), c.end(), value) != c.end();
+}
+
+template <typename T, typename Value>
+bool containsPtr(const vector<T*>& c, const Value* value) {
+    return std::find(c.begin(), c.end(), value) != c.end();
+}
+
 template <typename T>
 void append(vector<T>& v, const vector<T>& w) {
   v.reserve(v.size() + w.size());
@@ -1879,6 +1894,16 @@ void serialize(Archive& ar1, const unsigned int) { \
   ar1(elems); \
 }
 
+template <typename T>
+void moveBlock(vector<T>& v, int firstIdx, int middleIdx, int lastIdx) {
+  if (firstIdx < 0 || middleIdx < 0 || lastIdx < 0) return;
+
+  auto first  = v.begin() + firstIdx;        // start of the block
+  auto middle = v.begin() + middleIdx;        // end of the block
+  auto last   = v.begin() + lastIdx;     // where we want to land
+
+  std::rotate(first, middle, last);
+}
 
 template <typename Phantom>
 struct EmptyStruct {

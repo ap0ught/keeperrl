@@ -239,6 +239,7 @@ class Creature : public Renderable, public UniqueEntity<Creature>, public OwnedO
   vector<Position> getCurrentPath() const;
   bool canNavigateToOrNeighbor(Position) const;
   bool canNavigateTo(Position pos) const;
+  bool hasQuarters() const;
 
   bool atTarget() const;
 

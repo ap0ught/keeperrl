@@ -487,7 +487,7 @@ class KrakenController : public Monster {
   WeakPointer<KrakenController> SERIAL(father);
 };
 
-namespace {
+
 class ShopkeeperController : public Monster, public EventListener<ShopkeeperController> {
   public:
   ShopkeeperController(Creature* c, vector<Vec2> area)
@@ -619,7 +619,7 @@ class ShopkeeperController : public Monster, public EventListener<ShopkeeperCont
   Level* SERIAL(myLevel) = nullptr;
   bool SERIAL(firstMove) = true;
 };
-}
+
 
 void CreatureFactory::addInventory(Creature* c, const vector<ItemType>& items) {
   for (ItemType item : items)

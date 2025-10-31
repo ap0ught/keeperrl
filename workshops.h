@@ -24,6 +24,7 @@ class Workshops {
     PItem addWork(Collective*, double workAmount, int skillAmount, const optional<ItemPrefix>&);
     void queue(Collective*, int index, int requiredSkill, optional<int> queueIndex = none);
     vector<PItem> unqueue(Collective*, int index);
+    void changePriority(Collective* collective, int index, int count, int destIndex);
     void changeNumber(int index, int number);
     bool isIdle(const Collective*, int skillAmount) const;
     void addUpgrade(int index, PItem);
