@@ -127,6 +127,65 @@ All source files must include the GPL v2 license header:
 - Minimal test infrastructure exists (`test.cpp`, `test.h`)
 - Focus on manual testing and gameplay validation
 - When adding features, ensure they don't break core gameplay mechanics
+- **ALWAYS include testing documentation** for every PR and issue (see Testing Requirements below)
+
+### Testing Requirements for PRs and Issues
+
+**Every PR must include:**
+
+1. **Testing Steps Section**: Clear, step-by-step instructions for testing the changes
+2. **Test Cases**: Specific scenarios that verify the feature works correctly
+3. **Expected Results**: What should happen when tests are executed
+4. **Regression Tests**: List of existing features to verify still work
+
+**Format for Testing Documentation:**
+
+In PR description or related documentation file:
+
+```markdown
+## Testing
+
+### Prerequisites
+- List what's needed (build, data files, etc.)
+
+### Test Setup
+- Configuration steps
+- Data preparation
+
+### Test Cases
+
+#### Test Case 1: [Name]
+**Objective**: What this test verifies
+**Steps**:
+1. Step one
+2. Step two
+3. etc.
+**Expected Results**: What should happen
+**Pass/Fail**: _____
+
+[Additional test cases...]
+
+### Regression Testing
+- Feature A still works
+- Feature B still works
+```
+
+**For configuration/data-driven features:**
+- Include example configuration with comments
+- Provide a complete test creature/item/etc. definition
+- Specify which config file to modify
+
+**For code features:**
+- Include unit test examples if applicable
+- Describe how to manually verify the change
+- List edge cases to test
+
+**Documentation Location:**
+- Simple features: Include in PR description
+- Complex features: Create/update entry in `README.dev`
+- Always reference testing docs from PR description
+
+See [README.dev](../README.dev) for the complete testing guide and examples.
 
 ## Important Notes
 

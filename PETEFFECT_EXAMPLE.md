@@ -90,7 +90,9 @@ The implementation involved:
 
 ## Testing
 
-To test the feature:
+### Quick Test
+
+To quickly test the feature:
 1. Create a creature with a `petEffect` in the game configuration
 2. Start a game with that creature
 3. Pet the creature and observe the effect being applied
@@ -100,3 +102,56 @@ Example effects to test with:
 - `Heal` - Healing effect
 - `Message "Text"` - Display a message
 - `Chain { Effect1 Effect2 }` - Apply multiple effects
+
+### Comprehensive Testing
+
+For detailed testing procedures, see the **Testing the petEffect Feature** section in [README.dev](README.dev).
+
+The testing guide includes:
+- Complete test setup instructions
+- 6 specific test cases covering:
+  - Basic petEffect application
+  - Multiple effects with Chain
+  - Friendly creature requirement
+  - Adjacency requirement
+  - Humanoid body requirement
+  - Graceful handling when petEffect is not configured
+- Regression testing checklist
+- Performance testing guidelines
+- Bug reporting template
+
+### Test Configuration Example
+
+Here's a complete test creature definition you can add to `data_free/game_config/creatures.txt`:
+
+```
+"TEST_DOG"
+  {
+    viewId = { "dog" }
+    attr = {
+      DEFENSE 10
+      DAMAGE 5
+    }
+    body = {
+      type = Humanoid
+      size = MEDIUM
+      material = FLESH
+    }
+    name = {
+      name = "friendly test dog"
+      groupName = "pack of test dogs"
+    }
+    petReaction = "\"WOOF! *tail wagging intensifies*\""
+    petEffect = Lasting 200 "HIGH_MORALE"
+    aiType = WILDLIFE
+    permanentEffects = {
+      PEACEFULNESS 1
+    }
+  }
+```
+
+This test creature is specifically designed to be:
+- Friendly (PEACEFULNESS effect)
+- Easy to find in-game
+- Uses a simple, observable effect (HIGH_MORALE)
+- Has a clear pet reaction message
