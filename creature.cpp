@@ -921,6 +921,7 @@ CreatureAction Creature::pet(Creature* other) const {
     return CreatureAction(this, [=](Creature* self) {
         verb(TStringId("YOU_PET"), TStringId("PETS"), other->getName().the());
         self->message(*other->getAttributes().getPetReaction(other));
+        other->getAttributes().applyPetEffect(other, self);
         self->spendTime();
     });
   else
