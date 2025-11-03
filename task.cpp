@@ -760,7 +760,7 @@ class WorkmanTask : public Task {
       return NoMove;
     }
     if (c->getPosition() == *cabin)
-      return NoMove;
+      return MoveInfo();
     if (auto move = c->moveTowards(*cabin))
       return move;
     setDone();
