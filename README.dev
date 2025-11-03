@@ -94,7 +94,7 @@ The diff highlights two important integration points for seasonal keeper skins:
   base, pair the keeper entry with fresh layout tokens in
   `data_free/game_config/random_layouts.txt`, bind them in
   `layout_mapping.txt`, and back them with unique furniture/tiles so the
-  scenery renders correctly.【F:data_free/game_config/random_layouts.txt†L624-L646】【F:data_free/game_config/layout_mapping.txt†L60-L95】【F:data_free/game_config/furniture.txt†L1100-L1159】【F:data_free/game_config/tiles.txt†L660-L698】
+  scenery renders correctly.[F:data_free/game_config/random_layouts.txt†L624-L646][F:data_free/game_config/layout_mapping.txt†L60-L95][F:data_free/game_config/furniture.txt†L1100-L1159][F:data_free/game_config/tiles.txt†L660-L698]
 
 Together these touches gate the art swap, base layout, and holiday décor behind
 calendar checks. New seasonal keepers can follow the same recipe: gate their
