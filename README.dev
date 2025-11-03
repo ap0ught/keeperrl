@@ -128,3 +128,280 @@ bug reports.
    rendering and interaction are organized.
 4. **Data Authoring** – Study `data_free/game_config/` to master the DSL loaded
    by `ContentFactory`, which is essential for balancing or adding new content.
+# KeeperRL Development Guide
+
+This document provides guidance for developers working on KeeperRL features.
+
+## Testing Features
+
+### General Testing Approach
+
+When implementing new features in KeeperRL, follow these testing guidelines:
+
+1. **Identify the Feature Scope**: Determine what components are affected (gameplay, UI, data configuration, etc.)
+2. **Create Test Scenarios**: Design specific scenarios that exercise the new functionality
+3. **Manual Testing**: Since KeeperRL is primarily a game, manual testing is essential
+4. **Configuration Testing**: Test data-driven features through game configuration files
+5. **Integration Testing**: Verify the feature works with existing game systems
+
+### Testing Workflow
+
+1. **Build the Game**:
+   ```bash
+   # Debug build for testing
+   make -j 8 DEBUG=true
+   
+   # Or optimized build for performance testing
+   make -j 8 OPT=true RELEASE=true
+   ```
+
+2. **Prepare Test Data**: Create or modify game configuration files in `data_free/game_config/`
+
+3. **Run the Game**: 
+   ```bash
+   ./keeper
+   ```
+
+4. **Execute Test Scenarios**: Follow the specific test steps for your feature
+
+5. **Verify Results**: Check that the expected behavior occurs
+
+6. **Document Results**: Record any issues or unexpected behavior
+
+---
+
+## Testing the petEffect Feature
+
+### Overview
+The `petEffect` feature allows creatures to apply effects when petted. This section describes how to test this feature.
+
+### Prerequisites
+- Built KeeperRL binary (`./keeper`)
+- Access to `data_free/game_config/creatures.txt` for configuration
+- Basic understanding of KeeperRL gameplay mechanics
+
+### Test Setup
+
+1. **Create a Test Creature with petEffect**
+
+   Edit `data_free/game_config/creatures.txt` and add or modify a creature definition:
+
+   ```
+   "TEST_DOG"
+     {
+       viewId = { "dog" }
+       attr = {
+         DEFENSE 10
+         DAMAGE 5
+       }
+       body = {
+         type = Humanoid
+         size = MEDIUM
+         material = FLESH
+       }
+       name = {
+         name = "friendly test dog"
+         groupName = "pack of test dogs"
+       }
+       petReaction = "\"WOOF! *tail wagging intensifies*\""
+       petEffect = Lasting 200 "HIGH_MORALE"
+       aiType = WILDLIFE
+       permanentEffects = {
+         PEACEFULNESS 1
+       }
+     }
+   ```
+
+2. **Add the Creature to a Game**
+
+   You can add the creature to an existing keeper game or create a scenario where the test creature spawns.
+
+### Test Cases
+
+#### Test Case 1: Basic petEffect Application
+
+**Objective**: Verify that petting a creature applies the configured effect.
+
+**Steps**:
+1. Start KeeperRL
+2. Load or start a game where the test creature is present
+3. Approach the test creature with a humanoid character
+4. Select the "Pet" action from the context menu
+5. Observe the pet reaction message: "WOOF! *tail wagging intensifies*"
+6. Check that the petting character receives the "HIGH_MORALE" buff
+7. Verify the buff lasts for approximately 200 game turns
+
+**Expected Results**:
+- Pet action succeeds when adjacent to friendly creature
+- Pet reaction message displays
+- HIGH_MORALE buff is applied to the petting character
+- Buff duration matches configuration (200 turns)
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 2: petEffect with Multiple Effects
+
+**Objective**: Verify that chain effects work correctly.
+
+**Setup**: Modify the test creature to use a Chain effect:
+```
+petEffect = Chain {
+  Lasting 200 "HIGH_MORALE"
+  Message "You feel the love!"
+  Heal
+}
+```
+
+**Steps**:
+1. Restart the game to load the new configuration
+2. Pet the test creature
+3. Verify all three effects apply:
+   - HIGH_MORALE buff appears
+   - Message "You feel the love!" displays
+   - Character's health increases (if damaged)
+
+**Expected Results**:
+- All effects in the chain apply in order
+- Each effect functions correctly
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 3: petEffect Requires Friendly Creatures
+
+**Objective**: Verify that petEffect only applies to friendly creatures.
+
+**Steps**:
+1. Modify the test creature to be hostile (remove PEACEFULNESS)
+2. Attempt to pet the now-hostile creature
+3. Verify that the pet action is not available or fails
+
+**Expected Results**:
+- Pet action is not available for hostile creatures
+- No effect is applied
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 4: petEffect Requires Adjacency
+
+**Objective**: Verify that petting requires being adjacent.
+
+**Steps**:
+1. Position character 2+ tiles away from friendly creature
+2. Verify pet action is not available
+3. Move to adjacent tile
+4. Verify pet action becomes available
+
+**Expected Results**:
+- Pet action only available when adjacent (within 1 tile)
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 5: petEffect Requires Humanoid Body
+
+**Objective**: Verify that only humanoid creatures can pet.
+
+**Steps**:
+1. Create or control a non-humanoid creature
+2. Attempt to pet the test creature
+3. Verify the action is not available
+
+**Expected Results**:
+- Non-humanoid creatures cannot pet other creatures
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 6: No petEffect Configured
+
+**Objective**: Verify graceful handling when petEffect is not defined.
+
+**Setup**: Remove `petEffect` from the creature definition (keep `petReaction`).
+
+**Steps**:
+1. Restart game with modified configuration
+2. Pet the creature
+3. Verify pet reaction displays but no effect applies
+
+**Expected Results**:
+- Pet action succeeds
+- Pet reaction message displays
+- No additional effects apply
+- No crashes or errors
+
+**Pass/Fail**: _____
+
+---
+
+### Regression Testing
+
+After implementing petEffect, verify these existing features still work:
+
+1. **chatEffect**: Test that creatures with chatEffect still apply effects when chatted with
+2. **petReaction**: Test that petReaction text still displays without petEffect
+3. **Serialization**: Save and load a game with petEffect creatures
+4. **Combat**: Verify petting doesn't interfere with combat mechanics
+
+### Performance Testing
+
+For performance-sensitive scenarios:
+
+1. Create multiple creatures with petEffect
+2. Pet several creatures in rapid succession
+3. Monitor frame rate and responsiveness
+4. Verify no memory leaks over extended gameplay
+
+### Bug Reporting
+
+If issues are found during testing, document:
+- Test case that failed
+- Steps to reproduce
+- Expected vs. actual behavior
+- Game version/commit hash
+- Configuration used
+- Save files if applicable
+
+---
+
+## Testing Other Features
+
+When testing other features, adapt this testing template:
+
+1. **Prerequisites**: What's needed to test the feature
+2. **Test Setup**: How to configure the test environment
+3. **Test Cases**: Specific scenarios with steps and expected results
+4. **Regression Testing**: What existing features to verify
+5. **Performance Testing**: Performance considerations if applicable
+
+---
+
+## Continuous Testing
+
+During development:
+
+1. Test incrementally as you implement
+2. Keep a test creature/config handy for quick verification
+3. Test both success and failure cases
+4. Document any edge cases discovered
+5. Update test documentation if behavior changes
+
+## Automated Testing
+
+While KeeperRL doesn't have extensive automated tests, you can:
+
+1. Create reference configuration files for features
+2. Use version control to track test data changes
+3. Maintain a checklist of manual tests for releases
+4. Script repetitive setup tasks where possible
+
+---
+
+For questions or additions to this testing guide, please update this document and submit a PR.

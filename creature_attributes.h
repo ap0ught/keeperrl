@@ -97,6 +97,7 @@ class CreatureAttributes {
   bool canEquip() const;
   void chatReaction(Creature* me, Creature* other);
   optional<TString> getPetReaction(const Creature* me) const;
+  void applyPetEffect(Creature* me, Creature* other);
   TString getDescription(const ContentFactory*) const;
   void add(BodyPart, int count, const ContentFactory*);
   bool isAffected(LastingEffect, GlobalTime) const;
@@ -179,6 +180,7 @@ class CreatureAttributes {
   optional<TString> SERIAL(deathDescription);
   bool SERIAL(canJoinCollective) = true;
   optional<TString> SERIAL(petReaction);
+  heap_optional<Effect> SERIAL(petEffect);
   optional<BuffId> SERIAL(hatedByEffect);
   bool SERIAL(instantPrisoner) = false;
   void initializeLastingEffects();
