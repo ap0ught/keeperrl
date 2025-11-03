@@ -1963,6 +1963,56 @@ End
   {
     permanentEffects = {}
   }
+"LUMBERJACK" inherit "PESEANT"
+  {
+    attr = append {
+      DAMAGE 20
+      DEFENSE 16
+      DIGGING 12
+    }
+    permanentEffects = append {
+      NO_CARRY_LIMIT 1
+    }
+    inventory = append {
+      { "BattleAxe" }
+    }
+    name = {
+      name = CREATURE_ATTRIBUTES_LUMBERJACK_NAME
+    }
+  }
+"MINER" inherit "PESEANT"
+  {
+    attr = append {
+      DAMAGE 18
+      DEFENSE 14
+      DIGGING 18
+    }
+    permanentEffects = append {
+      NO_CARRY_LIMIT 1
+    }
+    inventory = append {
+      { "MiningPick" }
+    }
+    name = {
+      name = CREATURE_ATTRIBUTES_MINER_NAME
+    }
+  }
+"LIGHT_BRINGER" inherit "PESEANT"
+  {
+    attr = append {
+      DAMAGE 12
+      DEFENSE 12
+    }
+    permanentEffects = append {
+      NO_CARRY_LIMIT 1
+    }
+    inventory = append {
+      { "Torch" }
+    }
+    name = {
+      name = CREATURE_ATTRIBUTES_LIGHT_BRINGER_NAME
+    }
+  }
 "ACOLYTE" inherit "PESEANT"
   {
     viewId = { "acolyte" }

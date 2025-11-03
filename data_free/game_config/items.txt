@@ -340,6 +340,24 @@ SPELL_HEAD("Adoxium", 220 148 220, ITEMS_TELEPORTHEADADOXIUM_NAME, ADOXIUM, 18, 
     storageIds = {"weapons" "equipment"}
     equipmentGroup = EQUIPMENT_GROUP_BASIC_EQUIPMENT
   }
+"MiningPick"
+  {
+    viewId = { "pickaxe" }
+    name = ITEMS_MININGPICK_NAME
+    itemClass = WEAPON
+    equipmentSlot = WEAPON
+    weight = 2.5
+    modifiers = {
+      DAMAGE 9
+    }
+    price = 6
+    weaponInfo = {
+      attackType = BASH
+      attackMsg = STRIKE
+    }
+    storageIds = {"weapons" "equipment"}
+    equipmentGroup = EQUIPMENT_GROUP_BASIC_EQUIPMENT
+  }
 "Sword"
   {
     viewId = { "sword" }
@@ -850,7 +868,7 @@ End
     ownedEffect = LIGHT_SOURCE
     name = ITEMS_TORCH_NAME
     price = 2
-    storageIds = {"equipment"}
+    storageIds = {"equipment" "torches"}
     equipmentGroup = EQUIPMENT_GROUP_LIGHT_EMITTING_EQUIPMENT
   }
 "Robe"
@@ -1820,7 +1838,7 @@ End
     resourceId = "STONE"
     weight = 0.3
     wishedCount = { 5 10 }
-    storageIds = {"resources"}
+    storageIds = {"resources" "ore"}
   }
 "BlackMarketKey"
   {
@@ -1856,7 +1874,7 @@ End
     price = 0
     resourceId = "IRON"
     weight = 0.5
-    storageIds = {"resources"}
+    storageIds = {"resources" "ore"}
   }
 "AdaOre"
   {
@@ -1866,7 +1884,7 @@ End
     price = 2
     resourceId = "ADA"
     weight = 0.5
-    storageIds = {"resources"}
+    storageIds = {"resources" "ore"}
   }
 "AdoxiumOre"
   {
@@ -1876,7 +1894,7 @@ End
     price = 4
     resourceId = "ADOXIUM"
     weight = 0.5
-    storageIds = {"resources"}
+    storageIds = {"resources" "ore"}
   }
 "InferniteOre"
   {
@@ -1890,7 +1908,7 @@ End
 #    carriedTickEffect = InferniteEffect()
 # With light source on minions will try to use it as a torch.
 #    ownedEffect = LIGHT_SOURCE
-    storageIds = {"resources"}
+    storageIds = {"resources" "ore"}
   }
 "WoodPlank"
   {
@@ -1900,7 +1918,7 @@ End
     price = 0
     resourceId = "WOOD"
     weight = 5
-    storageIds = {"resources"}
+    storageIds = {"resources" "lumber"}
   }
 "Bone"
   {
@@ -1949,7 +1967,7 @@ End
     resourceId = "GOLD"
     weight = 0.01
     wishedCount = { 500 1000 }
-    storageIds = {"gold" "resources"}
+    storageIds = {"gold" "resources" "ore"}
   }
 "Moonshine"
   {

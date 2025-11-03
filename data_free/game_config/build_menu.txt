@@ -168,6 +168,14 @@ End
 
     { Furniture {{ "GRAVE" }                      "STONE" 5 }      ""             BUILD_MENU_GROUPNAME3
         BUILD_MENU_HELP18}
+    { Furniture {{ "LOG_CABIN" }                 "WOOD" 40  }      ""      BUILD_MENU_GROUPNAME3
+        BUILD_MENU_HELP_LOG_CABIN }
+
+    { Furniture {{ "STONE_CABIN" }               "STONE" 45  }     ""      BUILD_MENU_GROUPNAME3
+        BUILD_MENU_HELP_STONE_CABIN }
+
+    { Furniture {{ "LIGHT_CABIN" }               "WOOD" 35  }      ""      BUILD_MENU_GROUPNAME3
+        BUILD_MENU_HELP_LIGHT_CABIN }
   }
 
   "automaton_storage"

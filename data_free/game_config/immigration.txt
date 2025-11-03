@@ -14,6 +14,48 @@
     }
 }
 
+"lumberjacks"
+{
+    {
+      ids = { "LUMBERJACK" }
+      traits = { WORKER WORKMAN LUMBERJACK NO_LIMIT NO_EQUIPMENT }
+      spawnLocation = NearLeader
+      initialRecruitment = 1
+      requirements = {
+        { 1 ExponentialCost "GOLD" 60 10 2 }
+        { 0.5 AttractionInfo 1 {FurnitureType "LOG_CABIN"}}
+      }
+    }
+}
+
+"miners"
+{
+    {
+      ids = { "MINER" }
+      traits = { WORKER WORKMAN MINER NO_LIMIT NO_EQUIPMENT }
+      spawnLocation = NearLeader
+      initialRecruitment = 1
+      requirements = {
+        { 1 ExponentialCost "GOLD" 70 12 2 }
+        { 0.5 AttractionInfo 1 {FurnitureType "STONE_CABIN"}}
+      }
+    }
+}
+
+"light_bringers"
+{
+    {
+      ids = { "LIGHT_BRINGER" }
+      traits = { WORKER WORKMAN LIGHT_BRINGER NO_LIMIT NO_EQUIPMENT }
+      spawnLocation = NearLeader
+      initialRecruitment = 1
+      requirements = {
+        { 1 ExponentialCost "GOLD" 65 11 2 }
+        { 0.5 AttractionInfo 1 {FurnitureType "LIGHT_CABIN"}}
+      }
+    }
+}
+
 "peseants"
 {
     {
