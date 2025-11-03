@@ -47,6 +47,7 @@
 #include "navigation_flags.h"
 #include "storage_info.h"
 #include "resource_id.h"
+#include "cost_info.h"
 #include "content_factory.h"
 #include "creature_list.h"
 #include "automaton_part.h"
@@ -1130,7 +1131,15 @@ class LightBringing : public WorkmanTask {
       }
     }
     if (c->getPosition() == *workshopTarget) {
-      torchesAvailable = std::max(1, getTripGoal());
+      int torchesToCraft = std::max(1, getTripGoal());
+      // Each torch costs 4 WOOD to craft (based on workshop configuration)
+      CostInfo torchCost(CollectiveResourceId("WOOD"), 4 * torchesToCraft);
+      if (!getCollective()->hasResource(torchCost)) {
+        setDone();
+        return NoMove;
+      }
+      getCollective()->takeResource(torchCost);
+      torchesAvailable = torchesToCraft;
       resetTrip();
       return c->wait();
     }
