@@ -70,12 +70,18 @@ instructions: |
      - Follow established patterns for repository synchronization
   
   ## Common Task Patterns
-  
+
   - **Adding new entity type**: Create in appropriate factory, add to content definitions
   - **Modifying game content**: Edit files in `data_free/game_config/`
   - **UI changes**: Work with `View`, `WindowView`, `GuiElem` classes
   - **AI behavior**: Modify `MonsterAI` and related controllers
   - **New features**: Consider impact across model, view, and data layers
+  - **Seasonal content**: Gate bases with calendar checks (`christmasSpecial`), add sprite remaps in `tileset.cpp`, and ensure supporting layouts, mappings, and décor assets exist in the data packs
+  - **Adventurer additions**: Register the adventurer in `keeper_creatures.txt`, create creature templates, promotion schools, base layouts, UI overlays, localized strings, and supporting assets as shown in the witch adventurer example
+
+  ## Asset Management
+
+  - Paid Steam owners can copy the `data/` directory from their installation (e.g. `D:\SteamLibrary\steamapps\common\KeeperRL\data`) into the repository root so paid art and audio load during local builds
   
   ## Critical Constraints
   

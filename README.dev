@@ -1,3 +1,133 @@
+# KeeperRL Developer Overview
+
+## Repository Layout
+KeeperRL houses its C++ engine, game data, and supporting tools in a single
+repository. Most gameplay sources and headers live at the repository root.
+Free, open-source assets reside under `data_free/`, while optional paid content
+(when present) sits in a sibling `data/` directory so the engine can load it at
+runtime.
+
+## Build & Dependencies
+The top-level `README.md` documents cross-platform build instructions. Desktop
+platforms (Linux, macOS, Windows) require modern C++ toolchains along with SDL,
+OpenAL, Vorbis, and Theora libraries. The build system supports tuning via
+Makefile flags such as `OPT`, `RELEASE`, `DEBUG`, and `OSX`. Steam distribution
+specifics—including `Makefile-steam` and `steam_*.cpp`—live alongside the main
+sources.
+
+## Runtime Entry Points
+`main.cpp` boots the application, handling command-line parsing through the
+bundled `ProgramOptions` helper, installing crash handlers, initializing Steam
+hooks when available, and handing control to `keeperMain`. From there, the
+`MainLoop` class orchestrates top-level flow such as view management, save-game
+handling, and starting gameplay sessions.
+
+## Simulation Core
+The `Game` class coordinates campaigns, models, and player state. It wires up
+collectives, event queues, and helper modes (like warlord or preview scenes).
+Each `Game` owns multiple `Model` instances—world segments that in turn manage
+`Level` objects, collectives, and the per-tick simulation loop.
+
+## Content Pipeline
+`ContentFactory` loads data-driven definitions for creatures, items, layouts,
+tech trees, and more. Designers author these assets in
+`data_free/game_config/` using a macro-enabled DSL, allowing content iteration
+without recompiling the C++ engine.
+
+### Example: Witch Adventurer (Halloween Event)
+Commit `95d2be4e97db2243210a71918e36a533ad94dcd1` introduced the seasonal
+witch adventurer and illustrates the moving pieces required to add a new
+playable adventurer:
+
+- **Adventurer roster** – Register the adventurer in
+  `data_free/game_config/keeper_creatures.txt`, which wires faction metadata,
+  home layout, and optional prisoner rules. The witch entry adds a single-slot
+  collective tied to the `witch_house` base and allows capturing enemies that
+  hate children.【F:data_free/game_config/keeper_creatures.txt†L280-L296】
+- **Creature template** – Define the actual unit (stats, equipment, spell list,
+  promotion group) in `data_free/game_config/creatures.txt`. The
+  `WITCH_PLAYER` template hooks into the `witch_adventurer` promotion tree and
+  supplies thematic gear and polymorph abilities.【F:data_free/game_config/creatures.txt†L780-L820】
+- **Promotion schools** – Extend `data_free/game_config/promotions.txt` with the
+  new training UI and rewards. Four witch schools (curse, polymorph, animals,
+  animation) apply staged `CollectiveMessage` notifications and gate abilities
+  behind creature flags.[F:data_free/game_config/promotions.txt†L70-L154]
+- **Base layout and set dressing** – Provide a random layout definition that
+  the adventurer spawns with. `witch_house` combines a hut, prison, and a ring
+  of haunted props to sell the Halloween theme.【F:data_free/game_config/random_layouts.txt†L624-L641】
+- **Supporting assets** – Add furniture variants (`HAUNTED_TREE*`,
+  `HAUNTED_EFFIGY*`) and special workshops (`WITCH_LABORATORY`) so the layout
+  and tech tree reference real resources.【F:data_free/game_config/furniture.txt†L1130-L1173】【F:data_free/game_config/workshop_info.txt†L71-L76】
+- **UI overlays** – Supply mini window layouts under `data_free/ui/` so each
+  promotion school renders an appropriate panel in game.【F:data_free/ui/witch_curse_school.txt†L1-L10】
+- **Localization** – Add translation strings for new messages, creature names,
+  and buff descriptions in the language packs (e.g.
+  `data_free/game_config/translations/english.txt`).【F:data_free/game_config/translations/english.txt†L1196-L1204】
+
+Following this pattern ensures future adventurers ship with complete gameplay
+support: roster integration, abilities, thematically consistent bases, UI, and
+localization.
+
+### Example: Santa Keeper (Christmas Event)
+Commit `7963b9257468fabb19eddf5e8a7a450d6be8973d` swaps the default keeper for a
+Santa-themed variant when the in-game calendar reaches the Christmas window.
+The diff highlights two important integration points for seasonal keeper skins:
+
+- **Keeper roster toggle** – Core keeper definitions in
+  `data_free/game_config/keeper_creatures.txt` add the `christmasSpecial`
+  modifier to their `startingBase` so the festive layout (with decorated trees)
+  only loads when `Clock::isChristmas()` returns true. The `dontAddTerritory`
+  flag keeps the Christmas base from claiming extra land outside the event
+  dates.[F:data_free/game_config/keeper_creatures.txt†L18-L24][F:clock.cpp†L37-L45]
+- **Sprite remapping** – `tileset.cpp` maps normal keeper sprites to Santa
+  alternates whenever the Christmas or Halloween checks flip on. Updating the
+  lookup tables inside `getSantaSprite` (and optionally `getHalloweenSprite`)
+  is enough to redirect rendering to a new seasonal tileset without touching
+  the rest of the drawing code.【F:tileset.cpp†L336-L387】
+- **Base activation guard** – `KeeperBaseInfo::isActive()` defers to the same
+  clock helper, ensuring the special base and its terrain are hidden outside
+  of the event window. New seasonal bases should reuse this hook so the layout
+  only appears during the intended festivities.【F:keeper_base_info.cpp†L1-L16】
+- **Layout and décor assets** – The `christmasSpecial` base pulls from the
+  `special_tree` random layout and its associated mapping so the grove of
+  decorated trees appears only during the holiday. When creating a new seasonal
+  base, pair the keeper entry with fresh layout tokens in
+  `data_free/game_config/random_layouts.txt`, bind them in
+  `layout_mapping.txt`, and back them with unique furniture/tiles so the
+  scenery renders correctly.[F:data_free/game_config/random_layouts.txt†L624-L646][F:data_free/game_config/layout_mapping.txt†L60-L95][F:data_free/game_config/furniture.txt†L1100-L1159][F:data_free/game_config/tiles.txt†L660-L698]
+
+Together these touches gate the art swap, base layout, and holiday décor behind
+calendar checks. New seasonal keepers can follow the same recipe: gate their
+`startingBase` with `christmasSpecial`, add sprite aliases in `tileset.cpp`, and
+wrap any custom base metadata with `KeeperBaseInfo::isActive()`.
+
+## Rendering, Input, and UI
+The abstract `View` interface decouples rendering back ends and input handling
+from the simulation. Concrete implementations such as `window_view.cpp` leverage
+helpers in `map_gui.cpp`, `renderer.cpp`, and related files to present the user
+interface, process events, and expose utilities for messaging, screenshots, and
+bug reports.
+
+## Supporting Tooling
+- `extern/` vendors small, header-only libraries (e.g., `ProgramOptions`,
+  cereal serialization helpers) so the project builds without extra package
+  managers.
+- `test.cpp` and `test.h` collect non-release regression tests that exercise
+  geometry utilities, pathfinding, serialization, and content sanity checks.
+- `server/` contains PHP scripts and SQL schema for scoreboards and crash
+  reporting used by the released game.
+
+## Suggested Next Steps for New Contributors
+1. **Gameplay Systems** – Dive into `collective_*`, `creature_*`, and `item_*`
+   sources to understand AI factions, behavior logic, and inventory mechanics.
+2. **Procedural Generation** – Explore `layout_generator.cpp`,
+   `level_builder.cpp`, and `data_free/game_config/map_layouts/` to see dungeon
+   and overworld creation.
+3. **User Interface** – Pair `view.h` with implementations such as
+   `window_view.cpp` and GUI helpers (`gui_elem.cpp`, `map_gui.cpp`) to learn how
+   rendering and interaction are organized.
+4. **Data Authoring** – Study `data_free/game_config/` to master the DSL loaded
+   by `ContentFactory`, which is essential for balancing or adding new content.
 # KeeperRL Development Guide
 
 This document provides guidance for developers working on KeeperRL features.
