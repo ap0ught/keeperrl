@@ -3936,6 +3936,7 @@ static TString getTaskText(MinionActivity option) {
     case MinionActivity::CONSTRUCTION: return TStringId("CONSTRUCTION_MINION_ACTIVITY");
     case MinionActivity::DIGGING: return TStringId("DIGGING_MINION_ACTIVITY");
     case MinionActivity::HAULING: return TStringId("HAULING_MINION_ACTIVITY");
+    case MinionActivity::WOODCUTTING: return TStringId("WOODCUTTING_MINION_ACTIVITY");
     case MinionActivity::WORKING: return TStringId("WORKING_MINION_ACTIVITY");
     case MinionActivity::EAT: return TStringId("EAT_MINION_ACTIVITY");
     case MinionActivity::EXPLORE_NOCTURNAL: return TStringId("EXPLORE_NOCTURNAL_MINION_ACTIVITY");
@@ -3975,6 +3976,7 @@ static ViewId getViewId(MinionActivity option) {
     case MinionActivity::CONSTRUCTION: return ViewId("castle_wall");
     case MinionActivity::DIGGING: return ViewId("dig_icon");
     case MinionActivity::HAULING: return ViewId("fetch_icon");
+    case MinionActivity::WOODCUTTING: return ViewId("dig_icon");
     case MinionActivity::WORKING: return ViewId("imp");
     case MinionActivity::EAT: return ViewId("pig");
     case MinionActivity::EXPLORE_NOCTURNAL: return ViewId("bat");

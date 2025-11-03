@@ -45,6 +45,7 @@
 #include "position_matching.h"
 #include "navigation_flags.h"
 #include "storage_info.h"
+#include "resource_id.h"
 #include "content_factory.h"
 #include "creature_list.h"
 #include "automaton_part.h"
@@ -726,6 +727,156 @@ class Explore : public Task {
 
 PTask Task::explore(Position pos) {
   return makeOwner<Explore>(pos);
+}
+
+
+class Woodcutting : public Task {
+  public:
+  Woodcutting(Collective* col, int quota) : Task(true), collective(col), treesPerTrip(std::max(1, quota)) {}
+
+  virtual MoveInfo getMove(Creature* c) override {
+    if (!collective) {
+      setDone();
+      return NoMove;
+    }
+    if (!cabin) {
+      cabin = findCabin(c);
+      if (!cabin) {
+        setDone();
+        return NoMove;
+      }
+    }
+    if (returning || treesCut >= treesPerTrip) {
+      if (!hasWood(c)) {
+        returning = false;
+        treesCut = 0;
+      } else {
+        if (c->getPosition() == *cabin) {
+          dropWood(c);
+          treesCut = 0;
+          returning = false;
+          targetTree = none;
+          setDone();
+          return c->wait();
+        }
+        if (auto move = c->moveTowards(*cabin))
+          return move;
+        setDone();
+        return NoMove;
+      }
+    }
+    if (!targetTree || !isTree(*targetTree)) {
+      targetTree = findTree(c);
+      if (!targetTree) {
+        setDone();
+        return NoMove;
+      }
+    }
+    auto dist = c->getPosition().dist8(*targetTree);
+    if (!dist)
+      return NoMove;
+    if (*dist > 1) {
+      if (auto move = c->moveTowards(*targetTree))
+        return move;
+      targetTree = none;
+      return NoMove;
+    }
+    auto dir = c->getPosition().getDir(*targetTree);
+    DestroyAction action(DestroyAction::Type::CUT);
+    if (auto destroy = c->destroy(dir, action)) {
+      return MoveInfo(destroy.append([this, treePos = *targetTree](Creature* creature) {
+        collectWood(creature, treePos);
+        ++treesCut;
+        if (treesCut >= treesPerTrip)
+          returning = true;
+        targetTree = none;
+      }));
+    }
+    targetTree = none;
+    return NoMove;
+  }
+
+  virtual TString getDescription() const override {
+    return TStringId("WOODCUTTING_TASK");
+  }
+
+  SERIALIZE_ALL(SUBCLASS(Task), collective, targetTree, cabin, treesPerTrip, treesCut, returning)
+  SERIALIZATION_CONSTRUCTOR(Woodcutting)
+
+  private:
+  static const CollectiveResourceId& woodId() {
+    static const CollectiveResourceId id("WOOD");
+    return id;
+  }
+
+  bool hasWood(const Creature* c) const {
+    for (auto item : c->getEquipment().getItems())
+      if (auto id = item->getResourceId())
+        if (*id == woodId())
+          return true;
+    return false;
+  }
+
+  void collectWood(Creature* creature, Position treePos) const {
+    vector<Item*> woodItems;
+    for (auto item : treePos.getItems())
+      if (auto id = item->getResourceId())
+        if (*id == woodId())
+          woodItems.push_back(item);
+    if (!woodItems.empty())
+      creature->pickUp(woodItems).perform(creature);
+  }
+
+  void dropWood(Creature* creature) const {
+    vector<Item*> woodItems;
+    for (auto item : creature->getEquipment().getItems())
+      if (auto id = item->getResourceId())
+        if (*id == woodId())
+          woodItems.push_back(item);
+    if (!woodItems.empty())
+      creature->drop(woodItems).perform(creature);
+  }
+
+  optional<Position> findCabin(Creature* c) {
+    auto& quarters = collective->getZones().getQuarters(c->getUniqueId());
+    if (!quarters.empty())
+      for (auto& pos : quarters)
+        return pos;
+    return none;
+  }
+
+  optional<Position> findTree(const Creature* c) const {
+    optional<Position> best;
+    optional<int> bestDist;
+    auto movement = c->getMovementType();
+    for (auto& pos : collective->getKnownTiles().getAll())
+      if (isTree(pos) && pos.canNavigateToOrNeighbor(c->getPosition(), movement)) {
+        auto dist = pos.dist8(c->getPosition());
+        if (dist && (!bestDist || *dist < *bestDist)) {
+          best = pos;
+          bestDist = *dist;
+        }
+      }
+    return best;
+  }
+
+  bool isTree(Position pos) const {
+    if (auto furniture = pos.getFurniture(FurnitureLayer::MIDDLE))
+      return furniture->canDestroy(DestroyAction(DestroyAction::Type::CUT));
+    return false;
+  }
+
+  Collective* SERIAL(collective) = nullptr;
+  optional<Position> SERIAL(targetTree);
+  optional<Position> SERIAL(cabin);
+  int SERIAL(treesPerTrip) = 3;
+  int SERIAL(treesCut) = 0;
+  bool SERIAL(returning) = false;
+};
+
+
+PTask Task::woodcutting(Collective* col, int treesPerTrip) {
+  return makeOwner<Woodcutting>(col, treesPerTrip);
 }
 
 

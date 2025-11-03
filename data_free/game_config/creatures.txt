@@ -1963,6 +1963,20 @@ End
   {
     permanentEffects = {}
   }
+"LUMBERJACK" inherit "PESEANT"
+  {
+    attr = append {
+      DAMAGE 20
+      DEFENSE 16
+      DIGGING 12
+    }
+    permanentEffects = append {
+      NO_CARRY_LIMIT 1
+    }
+    name = {
+      name = CREATURE_ATTRIBUTES_LUMBERJACK_NAME
+    }
+  }
 "ACOLYTE" inherit "PESEANT"
   {
     viewId = { "acolyte" }

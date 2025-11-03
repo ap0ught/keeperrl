@@ -382,6 +382,9 @@ PTask MinionActivities::generate(Collective* collective, Creature* c, MinionActi
     case MinionActivityInfo::GUARD3:
     case MinionActivityInfo::WORKER:
       return nullptr;
+    case MinionActivityInfo::WOODCUTTING:
+      PROFILE_BLOCK("Woodcutting");
+      return Task::woodcutting(collective, 3);
   }
   return nullptr;
 }

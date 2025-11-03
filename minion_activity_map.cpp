@@ -133,6 +133,8 @@ bool MinionActivityMap::isAvailable(const Collective* col, const Creature* c, Mi
     case MinionActivity::WORKING:
     case MinionActivity::HAULING:
       return c->getBody().canPickUpItems() && col->hasTrait(c, MinionTrait::WORKER);
+    case MinionActivity::WOODCUTTING:
+      return c->getBody().canPickUpItems() && col->hasTrait(c, MinionTrait::LUMBERJACK);
     case MinionActivity::DIGGING:
       return c->getAttr(AttrType("DIGGING")) > 0 && col->hasTrait(c, MinionTrait::WORKER);
     case MinionActivity::MINION_ABUSE:
