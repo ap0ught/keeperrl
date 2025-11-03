@@ -129,4 +129,4 @@ bug reports.
 4. **Data Authoring** – Study `data_free/game_config/` to master the DSL loaded
    by `ContentFactory`, which is essential for balancing or adding new content.
 
-For detailed information on testing features, see [TESTING.md](TESTING.md).
+For detailed information on testing features, see [TESTING.md](./TESTING.md).
