@@ -1194,8 +1194,6 @@ class LightBringing : public WorkmanTask {
     auto pos = c->getPosition();
     if (!needsTorch(pos))
       return false;
-    if (pos.getFurniture(FurnitureLayer::MIDDLE))
-      return false;
     auto& factory = *c->getGame()->getContentFactory();
     auto torch = factory.furniture.getFurniture(FurnitureType("GROUND_TORCH"), c->getTribeId());
     pos.addFurniture(std::move(torch));
