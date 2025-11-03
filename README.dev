@@ -43,26 +43,26 @@ playable adventurer:
   `data_free/game_config/keeper_creatures.txt`, which wires faction metadata,
   home layout, and optional prisoner rules. The witch entry adds a single-slot
   collective tied to the `witch_house` base and allows capturing enemies that
-  hate children.[F:data_free/game_config/keeper_creatures.txt†L280-L296]
+  hate children. See [keeper_creatures.txt#L280-L296](data_free/game_config/keeper_creatures.txt#L280-L296)
 - **Creature template** – Define the actual unit (stats, equipment, spell list,
   promotion group) in `data_free/game_config/creatures.txt`. The
   `WITCH_PLAYER` template hooks into the `witch_adventurer` promotion tree and
-  supplies thematic gear and polymorph abilities.[F:data_free/game_config/creatures.txt†L780-L820]
+  supplies thematic gear and polymorph abilities. See [creatures.txt#L780-L820](data_free/game_config/creatures.txt#L780-L820)
 - **Promotion schools** – Extend `data_free/game_config/promotions.txt` with the
   new training UI and rewards. Four witch schools (curse, polymorph, animals,
   animation) apply staged `CollectiveMessage` notifications and gate abilities
-  behind creature flags.[F:data_free/game_config/promotions.txt†L70-L154]
+  behind creature flags. See [promotions.txt#L70-L154](data_free/game_config/promotions.txt#L70-L154)
 - **Base layout and set dressing** – Provide a random layout definition that
   the adventurer spawns with. `witch_house` combines a hut, prison, and a ring
-  of haunted props to sell the Halloween theme.[F:data_free/game_config/random_layouts.txt†L624-L641]
+  of haunted props to sell the Halloween theme. See [random_layouts.txt#L624-L641](data_free/game_config/random_layouts.txt#L624-L641)
 - **Supporting assets** – Add furniture variants (`HAUNTED_TREE*`,
   `HAUNTED_EFFIGY*`) and special workshops (`WITCH_LABORATORY`) so the layout
-  and tech tree reference real resources.[F:data_free/game_config/furniture.txt†L1130-L1173][F:data_free/game_config/workshop_info.txt†L71-L76]
+  and tech tree reference real resources. See [furniture.txt#L1130-L1173](data_free/game_config/furniture.txt#L1130-L1173) and [workshop_info.txt#L71-L76](data_free/game_config/workshop_info.txt#L71-L76)
 - **UI overlays** – Supply mini window layouts under `data_free/ui/` so each
-  promotion school renders an appropriate panel in game.[F:data_free/ui/witch_curse_school.txt†L1-L10]
+  promotion school renders an appropriate panel in game. See [witch_curse_school.txt#L1-L10](data_free/ui/witch_curse_school.txt#L1-L10)
 - **Localization** – Add translation strings for new messages, creature names,
   and buff descriptions in the language packs (e.g.
-  `data_free/game_config/translations/english.txt`).[F:data_free/game_config/translations/english.txt†L1196-L1204]
+  `data_free/game_config/translations/english.txt`). See [english.txt#L1196-L1204](data_free/game_config/translations/english.txt#L1196-L1204)
 
 Following this pattern ensures future adventurers ship with complete gameplay
 support: roster integration, abilities, thematically consistent bases, UI, and
@@ -78,23 +78,23 @@ The diff highlights two important integration points for seasonal keeper skins:
   modifier to their `startingBase` so the festive layout (with decorated trees)
   only loads when `Clock::isChristmas()` returns true. The `dontAddTerritory`
   flag keeps the Christmas base from claiming extra land outside the event
-  dates.[F:data_free/game_config/keeper_creatures.txt†L18-L24][F:clock.cpp†L37-L45]
+  dates. See [keeper_creatures.txt#L18-L24](data_free/game_config/keeper_creatures.txt#L18-L24) and [clock.cpp#L37-L45](clock.cpp#L37-L45)
 - **Sprite remapping** – `tileset.cpp` maps normal keeper sprites to Santa
   alternates whenever the Christmas or Halloween checks flip on. Updating the
   lookup tables inside `getSantaSprite` (and optionally `getHalloweenSprite`)
   is enough to redirect rendering to a new seasonal tileset without touching
-  the rest of the drawing code.[F:tileset.cpp†L336-L387]
+  the rest of the drawing code. See [tileset.cpp#L336-L387](tileset.cpp#L336-L387)
 - **Base activation guard** – `KeeperBaseInfo::isActive()` defers to the same
   clock helper, ensuring the special base and its terrain are hidden outside
   of the event window. New seasonal bases should reuse this hook so the layout
-  only appears during the intended festivities.[F:keeper_base_info.cpp†L1-L16]
+  only appears during the intended festivities. See [keeper_base_info.cpp#L1-L16](keeper_base_info.cpp#L1-L16)
 - **Layout and décor assets** – The `christmasSpecial` base pulls from the
   `special_tree` random layout and its associated mapping so the grove of
   decorated trees appears only during the holiday. When creating a new seasonal
   base, pair the keeper entry with fresh layout tokens in
   `data_free/game_config/random_layouts.txt`, bind them in
   `layout_mapping.txt`, and back them with unique furniture/tiles so the
-  scenery renders correctly.[F:data_free/game_config/random_layouts.txt†L624-L646][F:data_free/game_config/layout_mapping.txt†L60-L95][F:data_free/game_config/furniture.txt†L1100-L1159][F:data_free/game_config/tiles.txt†L660-L698]
+  scenery renders correctly. See [random_layouts.txt#L624-L646](data_free/game_config/random_layouts.txt#L624-L646), [layout_mapping.txt#L60-L95](data_free/game_config/layout_mapping.txt#L60-L95), [furniture.txt#L1100-L1159](data_free/game_config/furniture.txt#L1100-L1159), and [tiles.txt#L660-L698](data_free/game_config/tiles.txt#L660-L698)
 
 Together these touches gate the art swap, base layout, and holiday décor behind
 calendar checks. New seasonal keepers can follow the same recipe: gate their
