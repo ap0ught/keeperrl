@@ -14,6 +14,19 @@
     }
 }
 
+"lumberjacks"
+{
+    {
+      ids = { "LUMBERJACK" }
+      traits = { WORKER LUMBERJACK NO_LIMIT NO_EQUIPMENT }
+      spawnLocation = NearLeader
+      initialRecruitment = 1
+      requirements = {
+        { 1 ExponentialCost "GOLD" 60 10 2 }
+      }
+    }
+}
+
 "peseants"
 {
     {

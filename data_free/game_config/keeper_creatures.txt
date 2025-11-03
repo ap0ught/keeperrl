@@ -7,7 +7,7 @@
   creatureId = { "KEEPER_MAGE" "KEEPER_MAGE_F" }
   tribeAlignment = EVIL
   villainGroups = { EVIL_KEEPER EVIL_COTTAGES }
-  immigrantGroups = {"imps" "dark_keeper"}
+  immigrantGroups = {"imps" "lumberjacks" "dark_keeper"}
   technology = {
       "alchemy" "advanced alchemy" "alchemical conversion" "humanoid mutation" "beast mutation"
       "chicken breeding" "pig breeding" "cow breeding" "iron working" "jewellery" "two-handed weapons"
@@ -40,7 +40,7 @@
   creatureId = { "KEEPER_KNIGHT_WHITE" "KEEPER_KNIGHT_WHITE_F" }
   tribeAlignment = LAWFUL
   villainGroups = { LAWFUL_KEEPER LAWFUL_COTTAGES }
-  immigrantGroups = {"peseants" "white_keeper" "white_recruits" "white_stables"}
+  immigrantGroups = {"peseants" "lumberjacks" "white_keeper" "white_recruits" "white_stables"}
   technology = {
       "alchemy" "advanced alchemy" "alchemical conversion"
       "chicken breeding" "pig breeding" "cow breeding" "iron working" "jewellery"
