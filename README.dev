@@ -78,7 +78,7 @@ The diff highlights two important integration points for seasonal keeper skins:
   modifier to their `startingBase` so the festive layout (with decorated trees)
   only loads when `Clock::isChristmas()` returns true. The `dontAddTerritory`
   flag keeps the Christmas base from claiming extra land outside the event
-  dates.【F:data_free/game_config/keeper_creatures.txt†L18-L24】【F:clock.cpp†L37-L45】
+  dates.[F:data_free/game_config/keeper_creatures.txt†L18-L24][F:clock.cpp†L37-L45]
 - **Sprite remapping** – `tileset.cpp` maps normal keeper sprites to Santa
   alternates whenever the Christmas or Halloween checks flip on. Updating the
   lookup tables inside `getSantaSprite` (and optionally `getHalloweenSprite`)
