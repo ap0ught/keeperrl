@@ -51,7 +51,7 @@ playable adventurer:
 - **Promotion schools** – Extend `data_free/game_config/promotions.txt` with the
   new training UI and rewards. Four witch schools (curse, polymorph, animals,
   animation) apply staged `CollectiveMessage` notifications and gate abilities
-  behind creature flags.【F:data_free/game_config/promotions.txt†L70-L154】
+  behind creature flags.[F:data_free/game_config/promotions.txt†L70-L154]
 - **Base layout and set dressing** – Provide a random layout definition that
   the adventurer spawns with. `witch_house` combines a hut, prison, and a ring
   of haunted props to sell the Halloween theme.【F:data_free/game_config/random_layouts.txt†L624-L641】
