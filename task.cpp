@@ -23,6 +23,8 @@
 #include "item.h"
 #include "creature.h"
 #include "collective.h"
+#include "zones.h"
+#include "known_tiles.h"
 #include "equipment.h"
 #include "tribe.h"
 #include "creature_name.h"
@@ -761,7 +763,7 @@ class WorkmanTask : public Task {
       return NoMove;
     }
     if (c->getPosition() == *cabin)
-      return MoveInfo();
+      return NoMove;
     if (auto move = c->moveTowards(*cabin))
       return move;
     setDone();
@@ -796,7 +798,6 @@ class WorkmanTask : public Task {
   }
 
   SERIALIZE_ALL(SUBCLASS(Task), collective, cabin, tripGoal, progress, returning)
-  SERIALIZATION_CONSTRUCTOR(WorkmanTask)
 
   private:
   optional<Position> findCabin(Creature* c) const {
@@ -853,6 +854,11 @@ class Woodcutting : public WorkmanTask {
     if (*dist > 1) {
       if (auto move = c->moveTowards(*targetTree))
         return move;
+      // Remove failed target from cache
+      treeCandidates.erase(
+          std::remove_if(treeCandidates.begin(), treeCandidates.end(),
+                         [this](const auto& p) { return p.first == *targetTree; }),
+          treeCandidates.end());
       targetTree = none;
       return NoMove;
     }
@@ -910,19 +916,41 @@ class Woodcutting : public WorkmanTask {
       creature->drop(woodItems).perform(creature);
   }
 
-  optional<Position> findTree(const Creature* c) const {
-    optional<Position> best;
-    optional<int> bestDist;
+  void refreshTreeCache(const Creature* c) const {
+    treeCandidates.clear();
     auto movement = c->getMovementType();
+    auto creaturePos = c->getPosition();
     for (auto& pos : getCollective()->getKnownTiles().getAll())
-      if (isTree(pos) && pos.canNavigateToOrNeighbor(c->getPosition(), movement)) {
-        auto dist = pos.dist8(c->getPosition());
-        if (dist && (!bestDist || *dist < *bestDist)) {
-          best = pos;
-          bestDist = *dist;
-        }
+      if (isTree(pos) && pos.canNavigateToOrNeighbor(creaturePos, movement)) {
+        auto dist = pos.dist8(creaturePos);
+        if (dist)
+          treeCandidates.push_back({pos, *dist});
       }
-    return best;
+    // Sort by distance, closest first
+    std::sort(treeCandidates.begin(), treeCandidates.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+    cachePosition = creaturePos;
+  }
+
+  optional<Position> findTree(const Creature* c) const {
+    // Refresh cache if empty or if creature moved significantly
+    if (treeCandidates.empty() || 
+        !cachePosition || 
+        cachePosition->dist8(c->getPosition()).value_or(999) > 10) {
+      refreshTreeCache(c);
+    }
+    
+    // Try candidates in order until we find a valid tree
+    while (!treeCandidates.empty()) {
+      auto candidate = treeCandidates.front().first;
+      if (isTree(candidate) && candidate.canNavigateToOrNeighbor(c->getPosition(), c->getMovementType())) {
+        return candidate;
+      }
+      // Invalid candidate, remove it
+      treeCandidates.erase(treeCandidates.begin());
+    }
+    
+    return none;
   }
 
   bool isTree(Position pos) const {
@@ -932,6 +960,8 @@ class Woodcutting : public WorkmanTask {
   }
 
   optional<Position> SERIAL(targetTree);
+  mutable std::vector<pair<Position, int>> SERIAL(treeCandidates);
+  mutable optional<Position> SERIAL(cachePosition);
 };
 
 
@@ -977,6 +1007,11 @@ class Mining : public WorkmanTask {
     if (*dist > 0) {
       if (auto move = c->moveTowards(*targetDeposit))
         return move;
+      // Remove failed target from cache
+      depositCandidates.erase(
+          std::remove_if(depositCandidates.begin(), depositCandidates.end(),
+                         [this](const auto& p) { return p.first == *targetDeposit; }),
+          depositCandidates.end());
       targetDeposit = none;
       return NoMove;
     }
@@ -1018,19 +1053,41 @@ class Mining : public WorkmanTask {
     return false;
   }
 
-  optional<Position> findDeposit(const Creature* c) const {
-    optional<Position> best;
-    optional<int> bestDist;
+  void refreshDepositCache(const Creature* c) const {
+    depositCandidates.clear();
     auto movement = c->getMovementType();
+    auto creaturePos = c->getPosition();
     for (auto& pos : getCollective()->getKnownTiles().getAll())
-      if (hasOreOnGround(pos) && pos.canNavigateToOrNeighbor(c->getPosition(), movement)) {
-        auto dist = pos.dist8(c->getPosition());
-        if (dist && (!bestDist || *dist < *bestDist)) {
-          best = pos;
-          bestDist = *dist;
-        }
+      if (hasOreOnGround(pos) && pos.canNavigateToOrNeighbor(creaturePos, movement)) {
+        auto dist = pos.dist8(creaturePos);
+        if (dist)
+          depositCandidates.push_back({pos, *dist});
       }
-    return best;
+    // Sort by distance, closest first
+    std::sort(depositCandidates.begin(), depositCandidates.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+    depositCachePosition = creaturePos;
+  }
+
+  optional<Position> findDeposit(const Creature* c) const {
+    // Refresh cache if empty or if creature moved significantly
+    if (depositCandidates.empty() || 
+        !depositCachePosition || 
+        depositCachePosition->dist8(c->getPosition()).value_or(999) > 10) {
+      refreshDepositCache(c);
+    }
+    
+    // Try candidates in order until we find a valid deposit
+    while (!depositCandidates.empty()) {
+      auto candidate = depositCandidates.front().first;
+      if (hasOreOnGround(candidate) && candidate.canNavigateToOrNeighbor(c->getPosition(), c->getMovementType())) {
+        return candidate;
+      }
+      // Invalid candidate, remove it
+      depositCandidates.erase(depositCandidates.begin());
+    }
+    
+    return none;
   }
 
   bool collectOre(Creature* creature, Position pos) const {
@@ -1055,6 +1112,8 @@ class Mining : public WorkmanTask {
 
   vector<CollectiveResourceId> SERIAL(resourceIds);
   optional<Position> SERIAL(targetDeposit);
+  mutable std::vector<pair<Position, int>> SERIAL(depositCandidates);
+  mutable optional<Position> SERIAL(depositCachePosition);
 };
 
 
@@ -1096,6 +1155,11 @@ class LightBringing : public WorkmanTask {
     if (*dist > 0) {
       if (auto move = c->moveTowards(*targetDark))
         return move;
+      // Remove failed target from cache
+      darkTileCandidates.erase(
+          std::remove_if(darkTileCandidates.begin(), darkTileCandidates.end(),
+                         [this](const auto& p) { return p.first == *targetDark; }),
+          darkTileCandidates.end());
       targetDark = none;
       return NoMove;
     }
@@ -1171,19 +1235,41 @@ class LightBringing : public WorkmanTask {
     return best;
   }
 
-  optional<Position> findDarkTile(const Creature* c) const {
-    optional<Position> best;
-    optional<int> bestDist;
+  void refreshDarkTileCache(const Creature* c) const {
+    darkTileCandidates.clear();
     auto movement = c->getMovementType();
+    auto creaturePos = c->getPosition();
     for (auto& pos : getCollective()->getKnownTiles().getAll())
-      if (needsTorch(pos) && pos.canNavigateToOrNeighbor(c->getPosition(), movement)) {
-        auto dist = pos.dist8(c->getPosition());
-        if (dist && (!bestDist || *dist < *bestDist)) {
-          best = pos;
-          bestDist = *dist;
-        }
+      if (needsTorch(pos) && pos.canNavigateToOrNeighbor(creaturePos, movement)) {
+        auto dist = pos.dist8(creaturePos);
+        if (dist)
+          darkTileCandidates.push_back({pos, *dist});
       }
-    return best;
+    // Sort by distance, closest first
+    std::sort(darkTileCandidates.begin(), darkTileCandidates.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+    darkTileCachePosition = creaturePos;
+  }
+
+  optional<Position> findDarkTile(const Creature* c) const {
+    // Refresh cache if empty or if creature moved significantly
+    if (darkTileCandidates.empty() || 
+        !darkTileCachePosition || 
+        darkTileCachePosition->dist8(c->getPosition()).value_or(999) > 10) {
+      refreshDarkTileCache(c);
+    }
+    
+    // Try candidates in order until we find a valid dark tile
+    while (!darkTileCandidates.empty()) {
+      auto candidate = darkTileCandidates.front().first;
+      if (needsTorch(candidate) && candidate.canNavigateToOrNeighbor(c->getPosition(), c->getMovementType())) {
+        return candidate;
+      }
+      // Invalid candidate, remove it
+      darkTileCandidates.erase(darkTileCandidates.begin());
+    }
+    
+    return none;
   }
 
   bool needsTorch(Position pos) const {
@@ -1209,6 +1295,8 @@ class LightBringing : public WorkmanTask {
   optional<Position> SERIAL(targetDark);
   optional<Position> SERIAL(workshopTarget);
   int SERIAL(torchesAvailable) = 0;
+  mutable std::vector<pair<Position, int>> SERIAL(darkTileCandidates);
+  mutable optional<Position> SERIAL(darkTileCachePosition);
 };
 
 
