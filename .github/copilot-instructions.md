@@ -41,6 +41,22 @@ make
 - **`cmake/`**: CMake modules
 - **`mac/`**: macOS-specific files
 
+## Developer Overview Highlights
+
+- **Entry Point & Loop**: `main.cpp` launches the game, wires up command-line handling, crash reporting, optional Steam hooks, and then delegates to `keeperMain` and `MainLoop` for save discovery and session management.
+- **Simulation Core**: `Game` coordinates campaigns and modes, owns one or more `Model` instances, and each `Model` runs a collection of `Level` objects that tick creatures, items, and event queues.
+- **Content Pipeline**: `ContentFactory` loads macro-enabled DSL files in `data_free/game_config/` to define creatures, items, layouts, tech trees, and UI overlays so designers can ship content without recompiles.
+- **UI & Rendering**: The `View` interface abstracts rendering/input, with `window_view.cpp`, `map_gui.cpp`, and `renderer.cpp` providing the concrete implementation.
+
+## Seasonal Content Workflows
+
+- **Adventurers (e.g., Witch/Halloween)**: When adding a seasonal adventurer, update `keeper_creatures.txt` to register the roster entry, create creature templates in `creatures.txt`, extend `promotions.txt` for training schools, provide themed base layouts in `random_layouts.txt`, supply supporting assets (furniture, workshops, UI panels, localization), and ensure promotions broadcast the correct `CollectiveMessage` updates.
+- **Keeper Swaps (e.g., Santa/Christmas)**: Gate the keeper's `startingBase` with `christmasSpecial` in `keeper_creatures.txt`, mirror sprite swaps in `tileset.cpp`, wrap base activation logic in `KeeperBaseInfo::isActive()`, and back the seasonal base with dedicated layout mappings, décor, and tiles so it only appears during the event window.
+
+## Paid Asset Setup
+
+- Developers who own the Steam release can copy the `data/` directory from their installation (for example `D:\SteamLibrary\steamapps\common\KeeperRL\data`) into the repository root so local builds load the paid art, audio, and video alongside `data_free/`.
+
 ## Code Conventions
 
 ### File Headers
