@@ -43,3 +43,23 @@ In terminal:
   # add OSX=true to compile on OSX
   ./keeper
   ```
+
+
+Using Paid Steam Assets
+=======================
+
+If you own the paid version of KeeperRL on Steam, you can reuse its assets when
+building from source. On Windows installations where Steam is configured to use
+`D:\SteamLibrary\steamapps\common\KeeperRL`, copy the entire `data` directory
+from that location into the root of this repository so that it sits alongside
+`data_free/`. Your tree should look like:
+
+```
+keeperrl/
+  data/
+  data_free/
+  ...
+```
+
+When the game launches it will detect the presence of `data/` and load the paid
+art, audio, and video resources automatically.
