@@ -50,8 +50,8 @@ struct GuardianInfo {
 };
 
 struct MinionActivityInfo {
-  enum Type { FURNITURE, EXPLORE, COPULATE, EAT, SPIDER, WORKER, ARCHERY, IDLE,
-      MINION_ABUSE, GUARD1, GUARD2, GUARD3, CONFESSION, BEING_COOKED } type;
+  enum Type { FURNITURE, EXPLORE, COPULATE, EAT, SPIDER, WORKER, WOODCUTTING, ARCHERY, IDLE, MINION_ABUSE, GUARD1,
+      GUARD2, GUARD3, CONFESSION, BEING_COOKED } type;
   MinionActivityInfo();
   MinionActivityInfo(FurnitureType, Task::SearchType = Task::SearchType::RANDOM_CLOSE);
   MinionActivityInfo(BuiltinUsageId);
