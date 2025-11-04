@@ -1916,6 +1916,9 @@ End
     name = CREATURE_ATTRIBUTES_PROSTITUTE_NAME1
   }
 }
+# Note: "PESEANT" is a historical typo (should be "PEASANT") that has been preserved
+# for compatibility with existing game data, save files, and the upstream codebase.
+# This identifier is used extensively throughout the game configuration files.
 "PESEANT"
   {
     viewId = { "peasant" }
