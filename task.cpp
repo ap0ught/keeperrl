@@ -13,8 +13,9 @@
    You should have received a copy of the GNU General Public License along with this program.
    If not, see http://www.gnu.org/licenses/ . */
 
-#include "enums.h"
 #include "stdafx.h"
+#include "enums.h"
+#include <algorithm>
 
 #include "task.h"
 #include "level.h"
@@ -22,6 +23,8 @@
 #include "item.h"
 #include "creature.h"
 #include "collective.h"
+#include "zones.h"
+#include "known_tiles.h"
 #include "equipment.h"
 #include "tribe.h"
 #include "creature_name.h"
@@ -46,6 +49,7 @@
 #include "navigation_flags.h"
 #include "storage_info.h"
 #include "resource_id.h"
+#include "cost_info.h"
 #include "content_factory.h"
 #include "creature_list.h"
 #include "automaton_part.h"
@@ -730,39 +734,111 @@ PTask Task::explore(Position pos) {
 }
 
 
-class Woodcutting : public Task {
+class WorkmanTask : public Task {
   public:
-  Woodcutting(Collective* col, int quota) : Task(true), collective(col), treesPerTrip(std::max(1, quota)) {}
+  WorkmanTask(Collective* col, int quota) : Task(true), collective(col), tripGoal(std::max(1, quota)) {}
 
-  virtual MoveInfo getMove(Creature* c) override {
-    if (!collective) {
+  protected:
+  WorkmanTask() : Task(true) {}
+
+  optional<Position> ensureCabin(Creature* c) {
+    if (!collective)
+      return none;
+    if (!cabin)
+      cabin = findCabin(c);
+    return cabin;
+  }
+
+  Collective* getCollective() const {
+    return collective;
+  }
+
+  optional<Position> getCabin() const {
+    return cabin;
+  }
+
+  MoveInfo moveTowardsCabin(Creature* c) {
+    if (!ensureCabin(c)) {
       setDone();
       return NoMove;
     }
-    if (!cabin) {
-      cabin = findCabin(c);
-      if (!cabin) {
+    if (c->getPosition() == *cabin)
+      return NoMove;
+    if (auto move = c->moveTowards(*cabin))
+      return move;
+    setDone();
+    return NoMove;
+  }
+
+  void resetTrip() {
+    returning = false;
+    progress = 0;
+  }
+
+  void markReturning() {
+    returning = true;
+  }
+
+  bool isReturning() const {
+    return returning;
+  }
+
+  void incrementProgress() {
+    ++progress;
+    if (progress >= tripGoal)
+      returning = true;
+  }
+
+  int getProgress() const {
+    return progress;
+  }
+
+  int getTripGoal() const {
+    return tripGoal;
+  }
+
+  SERIALIZE_ALL(SUBCLASS(Task), collective, cabin, tripGoal, progress, returning)
+
+  private:
+  optional<Position> findCabin(Creature* c) const {
+    auto& quarters = collective->getZones().getQuarters(c->getUniqueId());
+    return quarters.empty() ? none : optional<Position>(quarters.front());
+  }
+
+  Collective* SERIAL(collective) = nullptr;
+  optional<Position> SERIAL(cabin);
+  int SERIAL(tripGoal) = 1;
+  int SERIAL(progress) = 0;
+  bool SERIAL(returning) = false;
+};
+
+
+class Woodcutting : public WorkmanTask {
+  public:
+  Woodcutting(Collective* col, int quota) : WorkmanTask(col, quota) {}
+
+  virtual MoveInfo getMove(Creature* c) override {
+    if (!getCollective()) {
+      setDone();
+      return NoMove;
+    }
+    if (!ensureCabin(c)) {
         setDone();
         return NoMove;
-      }
     }
-    if (returning || treesCut >= treesPerTrip) {
+    if (isReturning() || getProgress() >= getTripGoal()) {
       if (!hasWood(c)) {
-        returning = false;
-        treesCut = 0;
+        resetTrip();
       } else {
-        if (c->getPosition() == *cabin) {
+        auto cabin = getCabin();
+        if (cabin && c->getPosition() == *cabin) {
           dropWood(c);
-          treesCut = 0;
-          returning = false;
+          resetTrip();
           targetTree = none;
           setDone();
           return c->wait();
         }
-        if (auto move = c->moveTowards(*cabin))
-          return move;
-        setDone();
-        return NoMove;
+        return moveTowardsCabin(c);
       }
     }
     if (!targetTree || !isTree(*targetTree)) {
@@ -778,6 +854,11 @@ class Woodcutting : public Task {
     if (*dist > 1) {
       if (auto move = c->moveTowards(*targetTree))
         return move;
+      // Remove failed target from cache
+      treeCandidates.erase(
+          std::remove_if(treeCandidates.begin(), treeCandidates.end(),
+                         [this](const auto& p) { return p.first == *targetTree; }),
+          treeCandidates.end());
       targetTree = none;
       return NoMove;
     }
@@ -786,9 +867,7 @@ class Woodcutting : public Task {
     if (auto destroy = c->destroy(dir, action)) {
       return MoveInfo(destroy.append([this, treePos = *targetTree](Creature* creature) {
         collectWood(creature, treePos);
-        ++treesCut;
-        if (treesCut >= treesPerTrip)
-          returning = true;
+        incrementProgress();
         targetTree = none;
       }));
     }
@@ -800,7 +879,7 @@ class Woodcutting : public Task {
     return TStringId("WOODCUTTING_TASK");
   }
 
-  SERIALIZE_ALL(SUBCLASS(Task), collective, targetTree, cabin, treesPerTrip, treesCut, returning)
+  SERIALIZE_ALL(SUBCLASS(WorkmanTask), targetTree)
   SERIALIZATION_CONSTRUCTOR(Woodcutting)
 
   private:
@@ -837,27 +916,41 @@ class Woodcutting : public Task {
       creature->drop(woodItems).perform(creature);
   }
 
-  optional<Position> findCabin(Creature* c) {
-    auto& quarters = collective->getZones().getQuarters(c->getUniqueId());
-    if (!quarters.empty())
-      for (auto& pos : quarters)
-        return pos;
-    return none;
+  void refreshTreeCache(const Creature* c) const {
+    treeCandidates.clear();
+    auto movement = c->getMovementType();
+    auto creaturePos = c->getPosition();
+    for (auto& pos : getCollective()->getKnownTiles().getAll())
+      if (isTree(pos) && pos.canNavigateToOrNeighbor(creaturePos, movement)) {
+        auto dist = pos.dist8(creaturePos);
+        if (dist)
+          treeCandidates.push_back({pos, *dist});
+      }
+    // Sort by distance, closest first
+    std::sort(treeCandidates.begin(), treeCandidates.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+    cachePosition = creaturePos;
   }
 
   optional<Position> findTree(const Creature* c) const {
-    optional<Position> best;
-    optional<int> bestDist;
-    auto movement = c->getMovementType();
-    for (auto& pos : collective->getKnownTiles().getAll())
-      if (isTree(pos) && pos.canNavigateToOrNeighbor(c->getPosition(), movement)) {
-        auto dist = pos.dist8(c->getPosition());
-        if (dist && (!bestDist || *dist < *bestDist)) {
-          best = pos;
-          bestDist = *dist;
-        }
+    // Refresh cache if empty or if creature moved significantly
+    if (treeCandidates.empty() || 
+        !cachePosition || 
+        cachePosition->dist8(c->getPosition()).value_or(999) > 10) {
+      refreshTreeCache(c);
+    }
+    
+    // Try candidates in order until we find a valid tree
+    while (!treeCandidates.empty()) {
+      auto candidate = treeCandidates.front().first;
+      if (isTree(candidate) && candidate.canNavigateToOrNeighbor(c->getPosition(), c->getMovementType())) {
+        return candidate;
       }
-    return best;
+      // Invalid candidate, remove it
+      treeCandidates.erase(treeCandidates.begin());
+    }
+    
+    return none;
   }
 
   bool isTree(Position pos) const {
@@ -866,17 +959,359 @@ class Woodcutting : public Task {
     return false;
   }
 
-  Collective* SERIAL(collective) = nullptr;
   optional<Position> SERIAL(targetTree);
-  optional<Position> SERIAL(cabin);
-  int SERIAL(treesPerTrip) = 3;
-  int SERIAL(treesCut) = 0;
-  bool SERIAL(returning) = false;
+  mutable std::vector<pair<Position, int>> SERIAL(treeCandidates);
+  mutable optional<Position> SERIAL(cachePosition);
+};
+
+
+class Mining : public WorkmanTask {
+  public:
+  Mining(Collective* col, int quota, vector<CollectiveResourceId> ids)
+      : WorkmanTask(col, quota), resourceIds(std::move(ids)) {}
+
+  virtual MoveInfo getMove(Creature* c) override {
+    if (!getCollective()) {
+      setDone();
+      return NoMove;
+    }
+    if (!ensureCabin(c)) {
+      setDone();
+      return NoMove;
+    }
+    if (isReturning() || getProgress() >= getTripGoal()) {
+      if (!hasOreInInventory(c)) {
+        resetTrip();
+      } else {
+        auto cabin = getCabin();
+        if (cabin && c->getPosition() == *cabin) {
+          dropOre(c);
+          resetTrip();
+          targetDeposit = none;
+          setDone();
+          return c->wait();
+        }
+        return moveTowardsCabin(c);
+      }
+    }
+    if (!targetDeposit || !hasOreOnGround(*targetDeposit)) {
+      targetDeposit = findDeposit(c);
+      if (!targetDeposit) {
+        setDone();
+        return NoMove;
+      }
+    }
+    auto dist = c->getPosition().dist8(*targetDeposit);
+    if (!dist)
+      return NoMove;
+    if (*dist > 0) {
+      if (auto move = c->moveTowards(*targetDeposit))
+        return move;
+      // Remove failed target from cache
+      depositCandidates.erase(
+          std::remove_if(depositCandidates.begin(), depositCandidates.end(),
+                         [this](const auto& p) { return p.first == *targetDeposit; }),
+          depositCandidates.end());
+      targetDeposit = none;
+      return NoMove;
+    }
+    if (collectOre(c, *targetDeposit)) {
+      incrementProgress();
+      if (!hasOreOnGround(*targetDeposit))
+        targetDeposit = none;
+      return c->wait();
+    }
+    targetDeposit = none;
+    return NoMove;
+  }
+
+  virtual TString getDescription() const override {
+    return TStringId("MINING_TASK");
+  }
+
+  SERIALIZE_ALL(SUBCLASS(WorkmanTask), resourceIds, targetDeposit)
+  SERIALIZATION_CONSTRUCTOR(Mining)
+
+  private:
+  bool matchesResource(const Item* item) const {
+    if (auto id = item->getResourceId())
+      return std::find(resourceIds.begin(), resourceIds.end(), *id) != resourceIds.end();
+    return false;
+  }
+
+  bool hasOreInInventory(const Creature* c) const {
+    for (auto item : c->getEquipment().getItems())
+      if (matchesResource(item))
+        return true;
+    return false;
+  }
+
+  bool hasOreOnGround(Position pos) const {
+    for (auto item : pos.getItems())
+      if (matchesResource(item))
+        return true;
+    return false;
+  }
+
+  void refreshDepositCache(const Creature* c) const {
+    depositCandidates.clear();
+    auto movement = c->getMovementType();
+    auto creaturePos = c->getPosition();
+    for (auto& pos : getCollective()->getKnownTiles().getAll())
+      if (hasOreOnGround(pos) && pos.canNavigateToOrNeighbor(creaturePos, movement)) {
+        auto dist = pos.dist8(creaturePos);
+        if (dist)
+          depositCandidates.push_back({pos, *dist});
+      }
+    // Sort by distance, closest first
+    std::sort(depositCandidates.begin(), depositCandidates.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+    depositCachePosition = creaturePos;
+  }
+
+  optional<Position> findDeposit(const Creature* c) const {
+    // Refresh cache if empty or if creature moved significantly
+    if (depositCandidates.empty() || 
+        !depositCachePosition || 
+        depositCachePosition->dist8(c->getPosition()).value_or(999) > 10) {
+      refreshDepositCache(c);
+    }
+    
+    // Try candidates in order until we find a valid deposit
+    while (!depositCandidates.empty()) {
+      auto candidate = depositCandidates.front().first;
+      if (hasOreOnGround(candidate) && candidate.canNavigateToOrNeighbor(c->getPosition(), c->getMovementType())) {
+        return candidate;
+      }
+      // Invalid candidate, remove it
+      depositCandidates.erase(depositCandidates.begin());
+    }
+    
+    return none;
+  }
+
+  bool collectOre(Creature* creature, Position pos) const {
+    vector<Item*> ores;
+    for (auto item : pos.getItems())
+      if (matchesResource(item))
+        ores.push_back(item);
+    if (ores.empty())
+      return false;
+    creature->pickUp(ores).perform(creature);
+    return true;
+  }
+
+  void dropOre(Creature* creature) const {
+    vector<Item*> ores;
+    for (auto item : creature->getEquipment().getItems())
+      if (matchesResource(item))
+        ores.push_back(item);
+    if (!ores.empty())
+      creature->drop(ores).perform(creature);
+  }
+
+  vector<CollectiveResourceId> SERIAL(resourceIds);
+  optional<Position> SERIAL(targetDeposit);
+  mutable std::vector<pair<Position, int>> SERIAL(depositCandidates);
+  mutable optional<Position> SERIAL(depositCachePosition);
+};
+
+
+class LightBringing : public WorkmanTask {
+  public:
+  LightBringing(Collective* col, int quota) : WorkmanTask(col, quota) {}
+
+  virtual MoveInfo getMove(Creature* c) override {
+    if (!getCollective()) {
+      setDone();
+      return NoMove;
+    }
+    if (!ensureCabin(c)) {
+      setDone();
+      return NoMove;
+    }
+    if (isReturning()) {
+      auto cabin = getCabin();
+      if (cabin && c->getPosition() == *cabin) {
+        torchesAvailable = 0;
+        resetTrip();
+        setDone();
+        return c->wait();
+      }
+      return moveTowardsCabin(c);
+    }
+    if (torchesAvailable <= 0)
+      return craftTorches(c);
+    if (!targetDark || !needsTorch(*targetDark)) {
+      targetDark = findDarkTile(c);
+      if (!targetDark) {
+        setDone();
+        return NoMove;
+      }
+    }
+    auto dist = c->getPosition().dist8(*targetDark);
+    if (!dist)
+      return NoMove;
+    if (*dist > 0) {
+      if (auto move = c->moveTowards(*targetDark))
+        return move;
+      // Remove failed target from cache
+      darkTileCandidates.erase(
+          std::remove_if(darkTileCandidates.begin(), darkTileCandidates.end(),
+                         [this](const auto& p) { return p.first == *targetDark; }),
+          darkTileCandidates.end());
+      targetDark = none;
+      return NoMove;
+    }
+    if (placeTorch(c)) {
+      --torchesAvailable;
+      incrementProgress();
+      targetDark = none;
+      if (torchesAvailable <= 0 || getProgress() >= getTripGoal())
+        markReturning();
+      return c->wait();
+    }
+    targetDark = none;
+    return NoMove;
+  }
+
+  virtual TString getDescription() const override {
+    return TStringId("LIGHTBRINGING_TASK");
+  }
+
+  SERIALIZE_ALL(SUBCLASS(WorkmanTask), targetDark, workshopTarget, torchesAvailable)
+  SERIALIZATION_CONSTRUCTOR(LightBringing)
+
+  private:
+  MoveInfo craftTorches(Creature* c) {
+    if (!workshopTarget || !isWorkshop(*workshopTarget)) {
+      workshopTarget = findWorkshop(c);
+      if (!workshopTarget) {
+        setDone();
+        return NoMove;
+      }
+    }
+    if (c->getPosition() == *workshopTarget) {
+      int torchesToCraft = std::max(1, getTripGoal());
+      // Each torch costs 4 WOOD to craft (based on workshop configuration)
+      CostInfo torchCost(CollectiveResourceId("WOOD"), 4 * torchesToCraft);
+      if (!getCollective()->hasResource(torchCost)) {
+        setDone();
+        return NoMove;
+      }
+      getCollective()->takeResource(torchCost);
+      torchesAvailable = torchesToCraft;
+      resetTrip();
+      return c->wait();
+    }
+    if (auto move = c->moveTowards(*workshopTarget))
+      return move;
+    workshopTarget = none;
+    return NoMove;
+  }
+
+  bool isWorkshop(Position pos) const {
+    if (auto furniture = pos.getFurniture(FurnitureLayer::MIDDLE)) {
+      auto type = furniture->getType();
+      return type == FurnitureType("WORKSHOP") || type == FurnitureType("ENCHANTED_WORKSHOP");
+    }
+    return false;
+  }
+
+  optional<Position> findWorkshop(const Creature* c) const {
+    optional<Position> best;
+    optional<int> bestDist;
+    auto movement = c->getMovementType();
+    auto& constructions = getCollective()->getConstructions();
+    for (auto type : {FurnitureType("WORKSHOP"), FurnitureType("ENCHANTED_WORKSHOP")})
+      for (auto& pos : constructions.getBuiltPositions(type))
+        if (pos.canNavigateToOrNeighbor(c->getPosition(), movement)) {
+          auto dist = pos.dist8(c->getPosition());
+          if (dist && (!bestDist || *dist < *bestDist)) {
+            best = pos;
+            bestDist = *dist;
+          }
+        }
+    return best;
+  }
+
+  void refreshDarkTileCache(const Creature* c) const {
+    darkTileCandidates.clear();
+    auto movement = c->getMovementType();
+    auto creaturePos = c->getPosition();
+    for (auto& pos : getCollective()->getKnownTiles().getAll())
+      if (needsTorch(pos) && pos.canNavigateToOrNeighbor(creaturePos, movement)) {
+        auto dist = pos.dist8(creaturePos);
+        if (dist)
+          darkTileCandidates.push_back({pos, *dist});
+      }
+    // Sort by distance, closest first
+    std::sort(darkTileCandidates.begin(), darkTileCandidates.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });
+    darkTileCachePosition = creaturePos;
+  }
+
+  optional<Position> findDarkTile(const Creature* c) const {
+    // Refresh cache if empty or if creature moved significantly
+    if (darkTileCandidates.empty() || 
+        !darkTileCachePosition || 
+        darkTileCachePosition->dist8(c->getPosition()).value_or(999) > 10) {
+      refreshDarkTileCache(c);
+    }
+    
+    // Try candidates in order until we find a valid dark tile
+    while (!darkTileCandidates.empty()) {
+      auto candidate = darkTileCandidates.front().first;
+      if (needsTorch(candidate) && candidate.canNavigateToOrNeighbor(c->getPosition(), c->getMovementType())) {
+        return candidate;
+      }
+      // Invalid candidate, remove it
+      darkTileCandidates.erase(darkTileCandidates.begin());
+    }
+    
+    return none;
+  }
+
+  bool needsTorch(Position pos) const {
+    if (pos.getLight() >= 1.5)
+      return false;
+    if (pos.getFurniture(FurnitureType("GROUND_TORCH")))
+      return false;
+    if (pos.getFurniture(FurnitureLayer::MIDDLE))
+      return false;
+    return true;
+  }
+
+  bool placeTorch(Creature* c) {
+    auto pos = c->getPosition();
+    if (!needsTorch(pos))
+      return false;
+    auto& factory = *c->getGame()->getContentFactory();
+    auto torch = factory.furniture.getFurniture(FurnitureType("GROUND_TORCH"), c->getTribeId());
+    pos.addFurniture(std::move(torch));
+    return true;
+  }
+
+  optional<Position> SERIAL(targetDark);
+  optional<Position> SERIAL(workshopTarget);
+  int SERIAL(torchesAvailable) = 0;
+  mutable std::vector<pair<Position, int>> SERIAL(darkTileCandidates);
+  mutable optional<Position> SERIAL(darkTileCachePosition);
 };
 
 
 PTask Task::woodcutting(Collective* col, int treesPerTrip) {
   return makeOwner<Woodcutting>(col, treesPerTrip);
+}
+
+PTask Task::mining(Collective* col, int loadsPerTrip) {
+  vector<CollectiveResourceId> ids = {
+      CollectiveResourceId("STONE"), CollectiveResourceId("IRON"), CollectiveResourceId("GOLD")};
+  return makeOwner<Mining>(col, loadsPerTrip, std::move(ids));
+}
+
+PTask Task::lightBringing(Collective* col, int torchesPerRun) {
+  return makeOwner<LightBringing>(col, torchesPerRun);
 }
 
 

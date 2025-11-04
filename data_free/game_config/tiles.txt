@@ -11,6 +11,10 @@
 { "defense_icon" "1" ColorId WHITE }
 { "parry_icon" "1" ColorId WHITE }
 { "divinity_icon" "1" ColorId WHITE }
+{ "pickaxe" "/" ColorId LIGHT_GRAY }
+{ "log_cabin" "H" ColorId LIGHT_BROWN }
+{ "stone_cabin" "H" ColorId GRAY }
+{ "light_cabin" "H" ColorId YELLOW }
 { viewId = "keeper1" symbol = "@" color = ColorId PURPLE weaponOrigin = {4 13} }
 { viewId = "keeper2" symbol = "@" color = ColorId PURPLE weaponOrigin = {4 13} }
 { viewId = "keeper3" symbol = "@" color = ColorId PURPLE weaponOrigin = {4 12} }

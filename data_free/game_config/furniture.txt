@@ -1336,6 +1336,30 @@ Def BedHeal() Heal { FLESH 0.005 } End
   luxury = 0.1
   lightEmission = 8.2
 }
+"LOG_CABIN"
+{
+  name = FURNITURE_LOG_CABIN_NAME
+  viewId = { "log_cabin" }
+  strength = 80
+  luxury = 0.2
+  storageIds = {"lumber"}
+}
+"STONE_CABIN"
+{
+  name = FURNITURE_STONE_CABIN_NAME
+  viewId = { "stone_cabin" }
+  strength = 100
+  luxury = 0.15
+  storageIds = {"ore" "resources"}
+}
+"LIGHT_CABIN"
+{
+  name = FURNITURE_LIGHT_CABIN_NAME
+  viewId = { "light_cabin" }
+  strength = 70
+  luxury = 0.25
+  storageIds = {"torches"}
+}
 "TORCH_N"
 {
   name = FURNITURE_TORCH_NAME

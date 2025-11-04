@@ -380,11 +380,21 @@ PTask MinionActivities::generate(Collective* collective, Creature* c, MinionActi
     case MinionActivityInfo::GUARD1:
     case MinionActivityInfo::GUARD2:
     case MinionActivityInfo::GUARD3:
-    case MinionActivityInfo::WORKER:
       return nullptr;
-    case MinionActivityInfo::WOODCUTTING:
-      PROFILE_BLOCK("Woodcutting");
-      return Task::woodcutting(collective, 3);
+    case MinionActivityInfo::WORKER:
+      switch (activity) {
+        case MinionActivity::WOODCUTTING:
+          PROFILE_BLOCK("Woodcutting");
+          return Task::woodcutting(collective, 3);
+        case MinionActivity::MINING:
+          PROFILE_BLOCK("Mining");
+          return Task::mining(collective, 3);
+        case MinionActivity::LIGHTBRINGING:
+          PROFILE_BLOCK("Light bringing");
+          return Task::lightBringing(collective, 3);
+        default:
+          return nullptr;
+      }
   }
   return nullptr;
 }
