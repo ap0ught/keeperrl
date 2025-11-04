@@ -186,7 +186,7 @@ class Furniture {
   optional<FurnitureTickType> SERIAL(tickType);
   struct WorkshopBoost {
     double SERIAL(multiplier);
-    WorkshopType (type);
+    WorkshopType type;
     SERIALIZE_ALL(multiplier, type);
   };
 
