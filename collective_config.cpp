@@ -286,6 +286,8 @@ const MinionActivityInfo& CollectiveConfig::getActivityInfo(MinionActivity task)
       case MinionActivity::HAULING: return {MinionActivityInfo::WORKER};
       case MinionActivity::WORKING: return {MinionActivityInfo::WORKER};
       case MinionActivity::WOODCUTTING: return {MinionActivityInfo::WOODCUTTING};
+      case MinionActivity::MINING: return {MinionActivityInfo::MINING};
+      case MinionActivity::LIGHTBRINGING: return {MinionActivityInfo::LIGHTBRINGING};
       case MinionActivity::DIGGING: return {MinionActivityInfo::WORKER};
       case MinionActivity::TRAIN: return {getTrainingPredicate(AttrType("DAMAGE"))};
       case MinionActivity::SLEEP:
