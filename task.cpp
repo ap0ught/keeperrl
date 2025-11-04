@@ -801,10 +801,7 @@ class WorkmanTask : public Task {
   private:
   optional<Position> findCabin(Creature* c) const {
     auto& quarters = collective->getZones().getQuarters(c->getUniqueId());
-    if (!quarters.empty())
-      for (auto& pos : quarters)
-        return pos;
-    return none;
+    return quarters.empty() ? none : optional<Position>(quarters.front());
   }
 
   Collective* SERIAL(collective) = nullptr;
