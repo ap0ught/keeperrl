@@ -801,10 +801,7 @@ class WorkmanTask : public Task {
   private:
   optional<Position> findCabin(Creature* c) const {
     auto& quarters = collective->getZones().getQuarters(c->getUniqueId());
-    if (!quarters.empty())
-      for (auto& pos : quarters)
-        return pos;
-    return none;
+    return quarters.empty() ? none : optional<Position>(quarters.front());
   }
 
   Collective* SERIAL(collective) = nullptr;
@@ -1279,8 +1276,6 @@ class LightBringing : public WorkmanTask {
   bool placeTorch(Creature* c) {
     auto pos = c->getPosition();
     if (!needsTorch(pos))
-      return false;
-    if (pos.getFurniture(FurnitureLayer::MIDDLE))
       return false;
     auto& factory = *c->getGame()->getContentFactory();
     auto torch = factory.furniture.getFurniture(FurnitureType("GROUND_TORCH"), c->getTribeId());
