@@ -239,6 +239,37 @@ If issues are found during testing, document:
 
 ---
 
+## Testing Documentation Changes
+
+When making documentation-only changes (like adding comments to configuration files):
+
+### Prerequisites
+- Built KeeperRL binary (`./keeper`)
+- Modified configuration file
+
+### Test Cases
+
+#### Test Case 1: Configuration File Syntax Validation
+
+**Objective**: Verify that documentation comments don't break configuration parsing.
+
+**Steps**:
+1. Build the game: `make -j 8 DEBUG=true`
+2. Start the game: `./keeper`
+3. Load a new game or existing save
+4. Verify the game loads without errors
+5. If comments were added to creature definitions, verify creatures spawn correctly
+
+**Expected Results**:
+- Game launches successfully
+- No parsing errors in console
+- Creatures/items/features load normally
+- Comments are ignored by parser
+
+**Pass/Fail**: _____
+
+---
+
 ## Testing Other Features
 
 When testing other features, adapt this testing template:
@@ -269,6 +300,38 @@ While KeeperRL doesn't have extensive automated tests, you can:
 2. Use version control to track test data changes
 3. Maintain a checklist of manual tests for releases
 4. Script repetitive setup tasks where possible
+
+---
+
+## Testing PESEANT Documentation Change
+
+### Overview
+This test verifies that the documentation comment added for the PESEANT typo doesn't break configuration parsing.
+
+### Prerequisites
+- Built KeeperRL binary (`./keeper`)
+- Modified `data_free/game_config/creatures.txt` with PESEANT documentation
+
+### Test Cases
+
+#### Test Case 1: Verify PESEANT Creatures Load Correctly
+
+**Objective**: Ensure peasant-based creatures (PESEANT, PESEANT_F, PESEANT_PLAYER, LUMBERJACK, ACOLYTE, NOMAD, ESKIMO, NATIVE) load without errors.
+
+**Steps**:
+1. Build the game: `make -j 8 DEBUG=true`
+2. Start the game: `./keeper`
+3. Start a new village or human settlement encounter
+4. Verify that peasants, peasant women, and peasant-derived creatures appear
+5. Check console for any parsing errors related to PESEANT definitions
+
+**Expected Results**:
+- Game launches successfully
+- No parsing errors in console output
+- Peasant creatures spawn and function normally
+- All PESEANT-derived creatures (LUMBERJACK, ACOLYTE, etc.) work correctly
+
+**Pass/Fail**: _____
 
 ---
 
