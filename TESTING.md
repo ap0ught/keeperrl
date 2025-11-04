@@ -239,6 +239,293 @@ If issues are found during testing, document:
 
 ---
 
+## Testing the Mining Activity Fix
+
+### Overview
+The Mining activity now correctly mines ore from rock deposits instead of only collecting pre-existing ore items on the ground. Miners will use the DIG destroy action to extract ore from MOUNTAIN, IRON_ORE, GOLD_ORE, and other ore-bearing furniture, similar to how lumberjacks cut down trees.
+
+### Prerequisites
+- Built KeeperRL binary (`./keeper`)
+- Access to game configuration files
+- Understanding of KeeperRL keeper gameplay
+
+### Key Changes
+- **Fixed**: Mining task now destroys ore deposits (IRON_ORE, GOLD_ORE, ADAMANTIUM_ORE, etc.) using DIG action
+- **Added**: MINING and LIGHTBRINGING minion activities
+- **Added**: WORKMAN, MINER, and LIGHT_BRINGER minion traits
+- **Added**: Mining follows same pattern as woodcutting (find deposit → destroy → collect items → return to cabin)
+
+### Test Setup
+
+The Mining activity requires:
+1. A miner creature with MINER trait
+2. A stone cabin (for ore storage and miner quarters)
+3. Accessible ore deposits or mountains on the map
+4. Known tiles that contain ore (explored territory)
+
+### Test Cases
+
+#### Test Case 1: Basic Ore Mining from Ore Deposits
+
+**Objective**: Verify that miners can extract ore from IRON_ORE, GOLD_ORE, and other ore furniture.
+
+**Steps**:
+1. Start a keeper game with ore deposits visible on the map
+2. Build a STONE_CABIN furniture (requires configuration from PR #15 or create manually)
+3. Recruit or assign a creature with MINER trait to MINING activity
+4. Assign the miner quarters in the stone cabin
+5. Enable MINING activity for the miner
+6. Observe the miner's behavior:
+   - Should navigate toward visible ore deposits
+   - Should move adjacent to ore deposit
+   - Should perform DIG destroy action
+   - Should collect dropped ore items
+   - Should return to cabin when carrying sufficient ore (default: 3 loads)
+   - Should drop ore items in cabin
+
+**Expected Results**:
+- Miner successfully destroys ore deposits using DIG action
+- Ore items (IronOre, GoldPiece, etc.) drop when deposit is destroyed
+- Miner picks up the ore items
+- Miner returns to cabin and drops ore
+- Process repeats for next ore deposit
+- Mining activity completes successfully
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 2: Mining Regular Mountains for Stone
+
+**Objective**: Verify that miners can extract stone from regular MOUNTAIN furniture.
+
+**Steps**:
+1. Position miner near regular mountain/rock tiles (not ore-specific)
+2. Enable MINING activity
+3. Observe miner mining regular mountains
+4. Verify Stone items are collected (if mountain has itemDrop configured)
+
+**Expected Results**:
+- Miner destroys regular mountains with DIG action
+- Any dropped items are collected
+- Miner returns to cabin with resources
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 3: Mining vs. Woodcutting Comparison
+
+**Objective**: Verify that mining works analogously to woodcutting.
+
+**Setup**: Have both a LUMBERJACK and MINER in the same game.
+
+**Steps**:
+1. Assign lumberjack to WOODCUTTING activity
+2. Assign miner to MINING activity
+3. Observe both activities side-by-side
+4. Verify similar behavioral patterns:
+   - Both find targets (trees vs. ore deposits)
+   - Both move adjacent and destroy
+   - Both collect dropped resources
+   - Both return to cabin after quota
+
+**Expected Results**:
+- Mining behavior mirrors woodcutting pattern
+- Both activities function independently without conflicts
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 4: Multiple Ore Types
+
+**Objective**: Verify miners handle different ore types correctly.
+
+**Steps**:
+1. Create a map with multiple ore types:
+   - IRON_ORE
+   - GOLD_ORE
+   - ADAMANTIUM_ORE
+   - ADOXIUM_ORE
+   - INFERNITE_ORE
+2. Enable MINING activity
+3. Observe miner mining different ore types
+4. Verify correct items drop from each ore type
+
+**Expected Results**:
+- Miner mines all configurable ore types
+- Correct ore items drop based on furniture configuration
+- Mining filters by configured resource IDs (STONE, IRON, GOLD by default)
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 5: Mining Activity Availability
+
+**Objective**: Verify MINING activity is only available to creatures with MINER trait.
+
+**Steps**:
+1. Create/recruit creatures with different traits:
+   - Creature with MINER trait
+   - Creature with LUMBERJACK trait only
+   - Regular WORKER creature
+2. Attempt to assign MINING activity to each
+3. Verify availability
+
+**Expected Results**:
+- Only creatures with MINER trait can perform MINING activity
+- Other creatures don't have MINING available in their activity list
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 6: No Available Ore Deposits
+
+**Objective**: Verify graceful handling when no ore deposits are available.
+
+**Steps**:
+1. Assign miner to MINING activity
+2. Ensure no accessible ore deposits exist (all mined out or blocked)
+3. Observe miner behavior
+
+**Expected Results**:
+- Miner activity completes without crashing
+- Miner becomes idle or switches to other activities
+- No errors or infinite loops
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 7: Cabin/Quarters Assignment
+
+**Objective**: Verify miners require quarters assignment for cabin usage.
+
+**Steps**:
+1. Create miner without assigned quarters
+2. Enable MINING activity
+3. Verify task behavior
+4. Assign quarters in stone cabin
+5. Retry MINING activity
+
+**Expected Results**:
+- Mining task may fail without cabin (task should set done)
+- Mining works properly with quarters assigned
+- Miner returns to correct cabin location
+
+**Pass/Fail**: _____
+
+---
+
+#### Test Case 8: Resource Collection Quota
+
+**Objective**: Verify miners collect configured number of loads per trip.
+
+**Steps**:
+1. Review task.cpp for quota configuration (default: 3 loads per trip)
+2. Enable MINING activity
+3. Count number of ore deposits mined before return to cabin
+4. Verify matches quota
+
+**Expected Results**:
+- Miner mines configured number of deposits (default: 3)
+- Returns to cabin after reaching quota
+- Drops all collected ore
+- Repeats cycle
+
+**Pass/Fail**: _____
+
+---
+
+### Regression Testing
+
+Verify existing systems still work correctly:
+
+1. **Woodcutting Activity**: Ensure woodcutting still works as before
+2. **DIGGING Activity**: Verify regular digging tasks unaffected
+3. **Worker Activities**: Confirm CONSTRUCTION, HAULING, WORKING still function
+4. **Minion Equipment**: Verify miners can equip pickaxes if configured
+5. **Territory System**: Confirm miners only mine in known tiles
+6. **Storage System**: Verify ore storage IDs work correctly
+7. **Save/Load**: Test game save and load with active mining tasks
+
+### Comparison with Bug Report
+
+The original issue stated:
+> "The new `Mining` task only targets tiles that already have ore items lying on the ground (`findDeposit` scans for `hasOreOnGround`, and `collectOre` merely picks up items). No attempt is made to destroy rock or mine ore veins like the woodcutting task does for trees."
+
+Verify the fix addresses this:
+
+**Test Case: Pre-Fix vs Post-Fix Behavior**
+
+**Steps**:
+1. Place ore items on ground (not in furniture)
+2. Create IRON_ORE furniture
+3. Enable MINING activity
+
+**Expected Results (Post-Fix)**:
+- Miner destroys IRON_ORE furniture using DIG action
+- Miner does NOT only pick up loose items
+- Behavior matches woodcutting (destroys source, then collects drops)
+
+**Pass/Fail**: _____
+
+---
+
+### Light Bringing Activity Testing
+
+Since LIGHTBRINGING was also added, basic smoke tests:
+
+**Test Case: Light Bringing Basic Function**
+
+**Objective**: Verify light bringers place torches in dark areas.
+
+**Steps**:
+1. Create creature with LIGHT_BRINGER trait
+2. Assign to LIGHTBRINGING activity
+3. Ensure dark (unlit) tiles exist in known territory
+4. Observe behavior
+
+**Expected Results**:
+- Light bringer finds dark tiles
+- Moves to dark tiles
+- Places ground torches
+- Returns to cabin periodically
+- Does not place torches where light already sufficient
+
+**Pass/Fail**: _____
+
+---
+
+### Performance Testing
+
+1. **Multiple Miners**: Assign 5-10 miners to MINING simultaneously
+2. **Large Maps**: Test mining on maps with many ore deposits
+3. **Long Sessions**: Run mining activities for extended play time
+4. **Save File Size**: Verify serialization doesn't bloat save files
+
+### Known Limitations
+
+Document any discovered limitations:
+- Mining targets any furniture with DIG destroy action
+- May mine unintended furniture if it has DIG action configured
+- Resource filtering is hardcoded to STONE, IRON, GOLD (can be modified in task.cpp)
+- Light bringing requires workshop furniture to exist
+
+### Bug Reporting
+
+If issues are found:
+- Specify which test case failed
+- Include miner configuration and traits
+- Include map state (ore deposit locations)
+- Note any error messages or crashes
+- Include save file if reproducible
+
+---
+
 ## Testing Other Features
 
 When testing other features, adapt this testing template:
