@@ -950,6 +950,7 @@ class WorkmanTask : public Task {
   private:
   optional<Position> findCabin(Creature* c) const {
     auto& quarters = collective->getZones().getQuarters(c->getUniqueId());
+    // Use first position in quarters as the cabin/drop-off point
     if (!quarters.empty())
       return *quarters.begin();
     return none;
@@ -1156,6 +1157,8 @@ class LightBringing : public WorkmanTask {
       }
     }
     if (c->getPosition() == *workshopTarget) {
+      // Simplified crafting: instantly obtain torches when at workshop
+      // In a full implementation, this would interact with workshop crafting mechanics
       torchesAvailable = std::max(1, getTripGoal());
       resetTrip();
       return c->wait();
@@ -1207,6 +1210,7 @@ class LightBringing : public WorkmanTask {
   }
 
   bool needsTorch(Position pos) const {
+    // Light threshold: positions with light level >= 1.5 are considered adequately lit
     if (pos.getLight() >= 1.5)
       return false;
     if (pos.getFurniture(FurnitureType("GROUND_TORCH")))
@@ -1235,6 +1239,8 @@ class LightBringing : public WorkmanTask {
 
 
 PTask Task::mining(Collective* col, int loadsPerTrip) {
+  // Configure which resource types miners will collect
+  // This could be moved to game configuration in the future
   vector<CollectiveResourceId> ids = {
       CollectiveResourceId("STONE"), CollectiveResourceId("IRON"), CollectiveResourceId("GOLD")};
   return makeOwner<Mining>(col, loadsPerTrip, std::move(ids));
